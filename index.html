@@ -1,0 +1,2822 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purple Ruler Client Enrolment Prototype</title>
+    <style>
+      :root {
+        --bg: #f7f5f8;
+        --surface: #ffffff;
+        --soft: #f1edf5;
+        --text: #22162e;
+        --muted: #665d70;
+        --brand: #5a2a84;
+        --brand-2: #7b50b0;
+        --teal: #24746e;
+        --amber: #a36515;
+        --danger: #96384b;
+        --success: #1f6b3a;
+        --slate: #4a5568;
+        --line: #ded6e7;
+        --line-strong: #c9bdd7;
+        --shadow-sm: 0 2px 6px rgba(35, 21, 48, 0.04);
+        --shadow: 0 14px 34px rgba(35, 21, 48, 0.08);
+        --shadow-lg: 0 24px 56px rgba(35, 21, 48, 0.14);
+        --fs-display: 32px;
+        --fs-h1: 24px;
+        --fs-h2: 20px;
+        --fs-h3: 16px;
+        --fs-body: 14px;
+        --fs-caption: 12px;
+        --radius: 8px;
+        --max: 1320px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        font-size: var(--fs-body);
+        line-height: 1.45;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 10px 11px;
+        color: var(--text);
+        background: #fff;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--brand-2);
+        outline-offset: 2px;
+      }
+
+      button:focus-visible,
+      .product-card:focus-visible,
+      .payment-option:focus-within,
+      .addon-check:focus-within {
+        box-shadow: 0 0 0 4px rgba(123, 80, 176, 0.2);
+      }
+
+      textarea {
+        min-height: 118px;
+        resize: vertical;
+      }
+
+      .app {
+        width: min(100% - 30px, var(--max));
+        margin: 0 auto;
+        padding: 20px 0 34px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: var(--radius);
+        color: #fff;
+        background: var(--brand);
+        font-weight: 800;
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 16px;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .main-head {
+        padding: 24px 26px;
+        border-bottom: 1px solid var(--line);
+        background: var(--soft);
+        position: relative;
+      }
+
+      .main-head::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--brand), var(--brand-2), var(--teal));
+      }
+
+      .eyebrow {
+        color: var(--brand);
+        font-size: var(--fs-caption);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      .main-head h1 {
+        max-width: 900px;
+        margin-top: 8px;
+        font-size: var(--fs-display);
+        line-height: 1.12;
+        font-weight: 800;
+      }
+
+      .main-head p {
+        max-width: 900px;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: var(--fs-body);
+        line-height: 1.45;
+      }
+
+      .progress {
+        padding: 16px 26px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .progress-row {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .progress-step {
+        position: relative;
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 9px;
+        align-items: start;
+        min-height: 62px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        cursor: pointer;
+        transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+      }
+
+      .progress-step.active {
+        border-color: var(--brand);
+        background: #f3edf8;
+        box-shadow: inset 3px 0 0 var(--brand);
+      }
+
+      .progress-step.done {
+        border-color: rgba(36, 116, 110, 0.34);
+        background: rgba(36, 116, 110, 0.08);
+      }
+
+      .progress-step:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .step-dot {
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        color: var(--muted);
+        background: #fff;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .progress-step.active .step-dot {
+        color: #fff;
+        background: var(--brand);
+        border-color: var(--brand);
+      }
+
+      .progress-step.done .step-dot {
+        color: #fff;
+        background: var(--teal);
+        border-color: var(--teal);
+      }
+
+      .progress-step strong {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .progress-step span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.3;
+      }
+
+      .content {
+        padding: 24px 26px 26px;
+      }
+
+      .step {
+        display: none;
+      }
+
+      .step.active {
+        display: block;
+      }
+
+      .step h2 {
+        margin-bottom: 8px;
+        font-size: var(--fs-h1);
+        font-weight: 800;
+      }
+
+      .step-intro {
+        max-width: 800px;
+        margin-bottom: 18px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .field {
+        display: grid;
+        gap: 7px;
+      }
+
+      .field label {
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .field-wide {
+        grid-column: span 2;
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .product-card,
+      .table-box,
+      .quote-box,
+      .review-box,
+      .payment-option {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+      }
+
+      .product-card {
+        display: grid;
+        gap: 14px;
+        padding: 20px;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+        transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+      }
+
+      .product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+      }
+
+      .product-card.selected {
+        border-color: var(--brand);
+        box-shadow: inset 0 0 0 1px var(--brand);
+      }
+
+      .product-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .product-head h3 {
+        margin-top: 8px;
+        font-size: var(--fs-h2);
+        line-height: 1.22;
+        font-weight: 800;
+      }
+
+      .price-block {
+        min-width: 140px;
+        text-align: right;
+      }
+
+      .price-main {
+        display: block;
+        color: var(--brand);
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1.15;
+      }
+
+      .price-stack {
+        display: grid;
+        gap: 3px;
+      }
+
+      .price-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        color: var(--brand);
+        font-size: 18px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .price-row span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        align-self: end;
+      }
+
+      .price-unit {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: var(--fs-caption);
+        line-height: 1.25;
+      }
+
+      .tag {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        padding: 5px 8px;
+        border-radius: var(--radius);
+        color: var(--brand);
+        background: var(--soft);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .tag.teal {
+        color: var(--teal);
+        background: rgba(36, 116, 110, 0.1);
+      }
+
+      .tag.amber {
+        color: var(--amber);
+        background: rgba(163, 101, 21, 0.1);
+      }
+
+      .tag.danger {
+        color: var(--danger);
+        background: rgba(150, 56, 75, 0.08);
+      }
+
+      .tag.muted {
+        color: var(--muted);
+        background: #f3f0f6;
+      }
+
+      .option-pill {
+        display: inline-flex;
+        width: fit-content;
+        max-width: 100%;
+        align-items: center;
+        padding: 5px 9px;
+        border-radius: 999px;
+        color: #fff;
+        background: var(--brand);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      .option-pill.blue { background: #4f7ee8; }
+      .option-pill.teal { background: #087e8b; }
+      .option-pill.green { background: #13795b; }
+      .option-pill.amber { background: #d99000; }
+      .option-pill.red { background: #d94d4d; }
+      .option-pill.purple { background: var(--brand); }
+      .option-pill.muted { background: #697386; }
+
+      .product-summary {
+        display: grid;
+        gap: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .summary-row {
+        display: grid;
+        grid-template-columns: 130px 1fr;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .summary-row:last-child {
+        border-bottom: 0;
+      }
+
+      .summary-row.danger {
+        color: var(--danger);
+      }
+
+      .summary-row.danger .summary-label {
+        color: var(--danger);
+      }
+
+      .summary-label {
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .summary-text {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .summary-text.danger {
+        color: #744252;
+      }
+
+      .compact-bullets {
+        margin: 0;
+        padding-left: 16px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .compact-bullets li {
+        margin: 3px 0;
+      }
+
+      .compact-bullets.danger {
+        color: #744252;
+      }
+
+      .boundary-list {
+        display: grid;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: #744252;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .boundary-list li {
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr);
+        gap: 7px;
+        align-items: start;
+      }
+
+      .boundary-icon {
+        font-size: 12px;
+        line-height: 1.35;
+        transform: translateY(1px);
+      }
+
+      .included-list {
+        display: grid;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .included-list li {
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr);
+        gap: 7px;
+        align-items: start;
+      }
+
+      .included-icon {
+        font-size: 12px;
+        line-height: 1.35;
+        transform: translateY(1px);
+      }
+
+      .addon-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .list {
+        margin: 0;
+        padding-left: 16px;
+        color: var(--muted);
+      }
+
+      .list li {
+        margin: 4px 0;
+        line-height: 1.35;
+      }
+
+      .paste-tools {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--soft);
+      }
+
+      .paste-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: start;
+      }
+
+      .column-strip {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .column-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 7px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .paste-tools textarea {
+        min-height: 150px;
+        border: 1px dashed var(--line-strong);
+        background: #fff;
+        line-height: 1.55;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .table-scroll {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 980px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 8px;
+        vertical-align: top;
+        text-align: left;
+      }
+
+      th {
+        background: var(--soft);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      td input,
+      td select {
+        min-width: 130px;
+      }
+
+      td .remove {
+        min-width: 74px;
+      }
+
+      .needs-table table {
+        min-width: 1180px;
+      }
+
+      .student-card-list,
+      .needs-card-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .student-card,
+      .needs-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        padding: 14px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .student-card.collapsed .student-fields,
+      .needs-card.collapsed .needs-fields,
+      .needs-card.collapsed .addon-options,
+      .group-card.collapsed .group-body {
+        display: none;
+      }
+
+      .student-card-head,
+      .needs-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .student-card-head h3,
+      .needs-card-head h3 {
+        font-size: var(--fs-h3);
+        font-weight: 700;
+      }
+
+      .student-fields {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .needs-fields {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .addon-options {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+
+      .addon-options > strong,
+      .group-section > h4 {
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .addon-option-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(250px, 1fr));
+        gap: 10px;
+        margin-top: 9px;
+      }
+
+      .addon-check {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+        min-height: 58px;
+        padding: 10px 12px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        background: #fff;
+        cursor: pointer;
+        transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+      }
+
+      .addon-check:hover {
+        border-color: var(--brand-2);
+        box-shadow: var(--shadow-sm);
+        transform: translateY(-1px);
+      }
+
+      .addon-check:has(input:checked) {
+        border-color: var(--brand);
+        background: #f8f4fb;
+        box-shadow: inset 3px 0 0 var(--brand), var(--shadow-sm);
+      }
+
+      .addon-check input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        accent-color: var(--brand);
+      }
+
+      .addon-check strong {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .addon-option-content {
+        display: grid;
+        gap: 5px;
+        min-width: 0;
+        justify-items: start;
+      }
+
+      .addon-check .option-pill {
+        display: inline-flex;
+        width: auto;
+        max-width: 100%;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.2;
+        white-space: normal;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+      }
+
+      .addon-price {
+        color: var(--brand);
+        font-size: 14px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .addon-note {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.3;
+      }
+
+      .group-card {
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        background: #fff;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .group-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 12px;
+        padding: 14px;
+        color: var(--text);
+        background: var(--soft);
+      }
+
+      .group-card-head h3 {
+        font-size: var(--fs-h3);
+        font-weight: 700;
+      }
+
+      .group-card-head .muted {
+        color: var(--muted);
+      }
+
+      .group-body {
+        display: grid;
+        gap: 12px;
+        padding: 14px;
+        background: #fbfafc;
+      }
+
+      .group-section {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        padding: 12px;
+      }
+
+      .group-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+      }
+
+      .group-footer strong {
+        color: var(--brand);
+        font-size: 17px;
+      }
+
+      .group-section h4 {
+        margin-bottom: 10px;
+        color: var(--brand);
+        font-size: 15px;
+      }
+
+      .day-grid,
+      .student-chip-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .day-check,
+      .student-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 9px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fbfafc;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .day-check input,
+      .student-chip input {
+        width: 15px;
+        height: 15px;
+      }
+
+      .btn {
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        padding: 10px 14px;
+        font-weight: 700;
+        transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn.primary {
+        color: #fff;
+        background: var(--brand);
+      }
+
+      .btn.secondary {
+        color: var(--brand);
+        background: #fff;
+        border-color: var(--line-strong);
+      }
+
+      .btn.ghost {
+        color: var(--muted);
+        background: transparent;
+        border-color: var(--line);
+      }
+
+      .remove {
+        color: var(--danger);
+        border: 1px solid rgba(150, 56, 75, 0.2);
+        background: rgba(150, 56, 75, 0.06);
+      }
+
+      .payment-grid,
+      .review-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .payment-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
+        gap: 14px;
+      }
+
+      .payment-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .payment-option,
+      .review-box {
+        padding: 14px;
+      }
+
+      .payment-option {
+        min-height: 120px;
+        transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+      }
+
+      .payment-option:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .payment-option.selected {
+        border-color: var(--brand);
+        background: #f6f0fb;
+        box-shadow: inset 0 0 0 1px var(--brand);
+      }
+
+      .payment-option label {
+        display: flex;
+        align-items: start;
+        gap: 10px;
+        cursor: pointer;
+      }
+
+      .payment-option input[type="radio"],
+      .inline-check input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+      }
+
+      .inline-check {
+        display: flex;
+        align-items: start;
+        gap: 10px;
+      }
+
+      .quote {
+        position: sticky;
+        top: 16px;
+        padding: 16px;
+      }
+
+      .quote h3 {
+        margin-top: 6px;
+        font-size: var(--fs-h2);
+        font-weight: 800;
+      }
+
+      .quote-head-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: start;
+      }
+
+      .quote-block {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .quote-block:last-child {
+        border-bottom: 0;
+      }
+
+      .quote-student {
+        display: grid;
+        gap: 6px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .quote-student:last-child {
+        border-bottom: 0;
+      }
+
+      .quote-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 13px;
+      }
+
+      .quote-line.addon-line {
+        align-items: start;
+      }
+
+      .quote-line span:first-child {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .quote-line strong {
+        white-space: nowrap;
+      }
+
+      .addon-line-label {
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr);
+        gap: 7px;
+        min-width: 0;
+        align-items: start;
+      }
+
+      .addon-remove {
+        width: 17px;
+        height: 17px;
+        display: grid;
+        place-items: center;
+        margin-top: 1px;
+        padding: 0;
+        border: 1px solid rgba(150, 56, 75, 0.28);
+        border-radius: 999px;
+        color: var(--danger);
+        background: rgba(150, 56, 75, 0.06);
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1;
+        transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+      }
+
+      .addon-remove:hover {
+        border-color: var(--danger);
+        background: rgba(150, 56, 75, 0.12);
+        transform: scale(1.05);
+      }
+
+      .addon-name {
+        display: grid;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .addon-kicker {
+        color: var(--brand);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        line-height: 1.1;
+        text-transform: uppercase;
+      }
+
+      .addon-title {
+        color: var(--text);
+        font-size: 12px;
+        line-height: 1.3;
+      }
+
+      .quote-total {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--brand);
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      .vat-note {
+        margin-top: 6px;
+        color: var(--teal);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .pass-through-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 6px;
+        padding-top: 7px;
+        border-top: 1px dashed var(--line-strong);
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .uplift-line {
+        display: grid;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 10px 10px 10px 12px;
+        border-left: 4px solid var(--amber);
+        border-radius: var(--radius);
+        background: rgba(163, 101, 21, 0.06);
+      }
+
+      .uplift-line .quote-line {
+        font-size: 13px;
+      }
+
+      .status {
+        display: inline-flex;
+        border-radius: var(--radius);
+        padding: 7px 9px;
+        color: var(--brand);
+        background: var(--soft);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .status.submitted { color: #fff; background: var(--brand); }
+      .status.review { color: #fff; background: var(--teal); }
+      .status.action { color: #fff; background: var(--amber); }
+      .status.preparing { color: #fff; background: var(--slate); }
+      .status.live { color: #fff; background: var(--success); }
+      .status.closed { color: #fff; background: var(--muted); }
+
+      .submitted-hero {
+        display: grid;
+        gap: 16px;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--soft);
+      }
+
+      .reference {
+        font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+        color: var(--brand);
+        font-size: 30px;
+        font-weight: 800;
+      }
+
+      .status-timeline {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .timeline-node {
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+      }
+
+      .timeline-node.active {
+        border-color: var(--brand);
+        box-shadow: inset 3px 0 0 var(--brand);
+      }
+
+      .info-block-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .save-note {
+        color: var(--teal);
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .hide {
+        display: none !important;
+      }
+
+      @media (min-width: 1440px) {
+        .workspace {
+          grid-template-columns: minmax(0, 1fr) 380px;
+        }
+      }
+
+      @media (min-width: 761px) and (max-width: 1120px) {
+        .workspace {
+          grid-template-columns: minmax(0, 1fr) 280px;
+        }
+
+        .quote {
+          top: 10px;
+          padding: 12px;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .quote {
+          position: sticky;
+          bottom: 0;
+          top: auto;
+          z-index: 5;
+          max-height: 60vh;
+          overflow: auto;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .progress-row,
+        .product-grid,
+        .grid.two,
+        .grid.three,
+        .needs-fields,
+        .addon-option-grid,
+        .product-summary,
+        .payment-shell,
+        .payment-options,
+        .status-timeline,
+        .info-block-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .field-wide {
+          grid-column: 1 / -1;
+        }
+
+        .student-fields {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .topbar,
+        .toolbar,
+        .product-head,
+        .quote-total {
+          align-items: stretch;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .student-fields {
+          grid-template-columns: 1fr;
+        }
+
+        .main-head h1 {
+          font-size: 28px;
+        }
+      }
+
+      @media print {
+        body {
+          background: #fff;
+          color: #000;
+        }
+
+        .topbar,
+        .panel:first-child {
+          display: none;
+        }
+
+        .app,
+        .workspace {
+          display: block;
+          width: 100%;
+          padding: 0;
+          margin: 0;
+        }
+
+        .quote {
+          position: static;
+          box-shadow: none;
+          border: 1px solid #000;
+          page-break-inside: avoid;
+        }
+
+        .quote::before {
+          content: "Purple Ruler Quote Summary";
+          display: block;
+          margin-bottom: 12px;
+          font-size: 20px;
+          font-weight: 800;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark">PR</div>
+          <div>
+            <strong>Purple Ruler</strong>
+            <div class="muted">Client service request prototype</div>
+          </div>
+        </div>
+        <div class="muted">Signed in as Programme contact</div>
+      </div>
+
+      <div class="workspace">
+        <div class="panel">
+          <div class="main-head">
+            <div class="eyebrow">Client Enrolment</div>
+            <h1>Choose a product, paste students, then confirm their needs</h1>
+            <p>
+              The product is selected once for the request. Student rows then capture sub-category,
+              dates, schedule needs, optional multi-select add-ons, and the quote updates line by line.
+            </p>
+          </div>
+
+          <div class="progress">
+            <div class="progress-row" id="progressRow"></div>
+          </div>
+
+          <div class="content">
+            <div class="step active" data-step="0">
+              <h2>Step 1. Choose product</h2>
+              <p class="muted step-intro">
+                Pick one product for this service request. Later steps only change student-level sub-category and add-ons.
+              </p>
+              <div class="product-grid" id="productGrid"></div>
+            </div>
+
+            <div class="step" data-step="1">
+              <h2>Step 2. Student information</h2>
+              <p class="muted step-intro">
+                Paste rows from Excel or Google Sheets, or edit directly in the table.
+              </p>
+              <div class="paste-tools">
+                <div class="paste-head">
+                  <div>
+                    <strong>Paste spreadsheet rows</strong>
+                    <p class="muted">Copy rows from Excel or Google Sheets, then paste them below.</p>
+                  </div>
+                  <span class="tag teal">Tab or comma separated</span>
+                </div>
+                <div class="column-strip">
+                  <span class="column-pill">1 First name</span>
+                  <span class="column-pill">2 Surname</span>
+                  <span class="column-pill">3 Email</span>
+                  <span class="column-pill">4 Year group</span>
+                  <span class="column-pill">5 Parent/carer name</span>
+                  <span class="column-pill">6 Parent/carer email</span>
+                  <span class="column-pill">7 Parent/carer phone</span>
+                </div>
+                <div class="field">
+                  <label for="pasteArea">Spreadsheet paste area</label>
+                  <textarea id="pasteArea" placeholder="Amelia&#9;Turner&#9;amelia.turner@school.org&#9;Year 9&#9;Rebecca Turner&#9;rebecca.turner@example.com&#9;07123 456789&#10;Luca&#9;Evans&#9;luca.evans@school.org&#9;Year 9&#9;Daniel Evans&#9;daniel.evans@example.com&#9;07987 654321"></textarea>
+                </div>
+                <div class="button-row">
+                  <button class="btn secondary" type="button" id="parsePaste">Parse pasted rows</button>
+                  <button class="btn ghost" type="button" id="addStudent">Add blank row</button>
+                  <button class="btn ghost" type="button" id="loadSample">Load sample rows</button>
+                </div>
+              </div>
+              <div class="student-card-list" id="studentRows"></div>
+            </div>
+
+            <div class="step" data-step="2">
+              <h2>Step 3. Student / group needs confirmation</h2>
+              <p class="muted step-intro">
+                Academy confirms student-level Core/Full needs. Blueprint and Distinction use group needs for subject, schedule, selected students and grade target.
+              </p>
+              <div class="needs-card-list" id="needsRows"></div>
+            </div>
+
+            <div class="step" data-step="3">
+              <h2>Step 4. Payment / PO confirmation</h2>
+              <p class="muted step-intro">
+                The quote sheet on the right is the commercial confirmation for payment or PO.
+              </p>
+              <div class="payment-shell">
+                <div class="payment-options" id="paymentOptions"></div>
+                <div class="quote-box" id="paymentDetail"></div>
+              </div>
+            </div>
+
+            <div class="step" data-step="4">
+              <h2>Step 5. Review &amp; submit</h2>
+              <p class="muted step-intro">
+                Confirm the selected product, student rows, quote sheet, and payment or PO state.
+              </p>
+              <div class="review-grid" id="reviewPanel"></div>
+            </div>
+
+            <div class="step" data-step="5">
+              <h2>Submitted</h2>
+              <p class="muted step-intro">
+                The service request has been saved to Wix CMS and sent to AnyCross as a complete JSON payload.
+              </p>
+              <div class="submitted-hero">
+                <div>
+                  <span class="status submitted">Submitted</span>
+                  <h3 style="margin-top: 12px;">Your service request has been received</h3>
+                  <div class="reference">PR-REQ-20481</div>
+                </div>
+                <div class="status-timeline">
+                  <div class="timeline-node active"><span class="status submitted">Submitted</span></div>
+                  <div class="timeline-node"><span class="status review">In Review</span></div>
+                  <div class="timeline-node"><span class="status action">Action Needed</span></div>
+                  <div class="timeline-node"><span class="status preparing">Preparing Delivery</span></div>
+                  <div class="timeline-node"><span class="status live">Live</span></div>
+                  <div class="timeline-node"><span class="status closed">Closed</span></div>
+                </div>
+                <div class="info-block-grid">
+                  <div class="review-box">
+                    <strong>Email confirmation sent</strong>
+                    <p class="muted">A confirmation has been sent to the programme and finance contacts.</p>
+                  </div>
+                  <div class="review-box">
+                    <strong>Portal status is ready</strong>
+                    <p class="muted">The client can now view this request and any action needed in the portal.</p>
+                  </div>
+                </div>
+                <div class="button-row">
+                  <button class="btn primary" type="button">View your request in the portal</button>
+                  <button class="btn secondary" type="button">Download summary PDF</button>
+                  <button class="btn ghost" type="button">Start another request</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <div class="save-note" id="saveState">Last saved just now</div>
+              <div class="actions">
+                <button class="btn ghost hide" id="backBtn" type="button">Back</button>
+                <button class="btn secondary" id="saveBtn" type="button">Save draft</button>
+                <button class="btn primary" id="nextBtn" type="button">Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel quote">
+          <div class="quote-head-row">
+            <div>
+              <div class="eyebrow">Quote Sheet</div>
+              <h3 id="quoteProduct">Academy</h3>
+            </div>
+            <span class="tag teal">EXCL. VAT</span>
+          </div>
+          <p class="muted" id="quoteSubtitle">Prices shown excluding VAT</p>
+          <div class="quote-block" id="quoteLines"></div>
+          <div class="quote-block">
+            <div class="quote-total">
+              <span>Total excl. VAT</span>
+              <strong id="quoteTotal">£0</strong>
+            </div>
+            <p class="vat-note" id="quoteVatNote">VAT @20%: £0.00 · Total incl. VAT: £0.00</p>
+            <p class="muted" style="margin-top: 8px;">VAT is added at invoice. External exam centre fees and pass-through costs are charged separately.</p>
+          </div>
+          <div class="quote-block">
+            <strong>Payment / PO</strong>
+            <p class="muted" id="quotePayment">Stripe card payment selected</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const yearGroups = ["Year 3", "Year 4", "Year 5", "Year 6", "Year 7", "Year 8", "Year 9", "Year 10", "Year 11", "Year 12", "Year 13"];
+      const subjects = ["Maths", "English", "Science", "ESOL", "Humanities", "Full curriculum"];
+      const supportProfiles = ["Standard", "Learning gaps", "SEND-informed support", "ESOL", "Reintegration"];
+      const groupOptions = ["GA", "GB", "GC", "1:1"];
+      const teachingDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+      const pillClasses = ["blue", "teal", "amber", "purple", "green"];
+      const groupSlots = [
+        { id: "09:00-10:00", label: "09:00-10:00", hours: 1 },
+        { id: "10:00-11:00", label: "10:00-11:00", hours: 1 },
+        { id: "11:00-12:30", label: "11:00-12:30", hours: 1.5 },
+        { id: "13:00-14:00", label: "13:00-14:00", hours: 1 },
+        { id: "14:00-15:30", label: "14:00-15:30", hours: 1.5 }
+      ];
+      const gradeOptions = ["Below expected", "Working towards", "Expected", "Greater depth", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9"];
+
+      const products = {
+        academy: {
+          name: "Academy",
+          subtitle: "48-hour Alternative Provision Online School",
+          rateLabel: "Core £139/week, Full £169/week",
+          priceDisplay: "£139 Core · £169 Full",
+          priceUnit: "/ student / week",
+          bestFor: ["UK schools needing a rapid AP start", "Local Authorities arranging suitable education quickly", "Students who need a standard online provision route"],
+          baseService: "A fast-start online Alternative Provision route for UK schools and Local Authorities that need suitable education arranged quickly.",
+          included: ["48-hour onboarding target", "Alternative Provision online school pathway", "Standard 1:6 live group teaching model", "Attendance and onboarding visibility"],
+          notSuitable: ["Bespoke curriculum design", "School timetable synchronisation", "Exclusive cohort requests"],
+          subCategories: [
+            { id: "core", label: "Core Subject", price: 139, unit: "week" },
+            { id: "full", label: "Full Subject", price: 169, unit: "week" }
+          ]
+        },
+        blueprint: {
+          name: "Blueprint",
+          subtitle: "Curriculum-aligned bespoke provision",
+          rateLabel: "£29.17/hour",
+          priceDisplay: "£29.17",
+          priceUnit: "/ hour",
+          bestFor: ["Timetable-aligned provision", "Scheme-of-work continuity", "Reintegration pathway support"],
+          baseRate: 29.17,
+          setupFee: 541.67,
+          baseService: "Bespoke provision aligned to timetable, scheme of work, level data, and reintegration pathway.",
+          included: ["Curriculum-aligned setup", "Scheme-of-work mapping", "Reintegration-oriented design", "Stakeholder coordination"],
+          notSuitable: ["Ad-hoc one-off tutoring", "No curriculum alignment need", "Very small requests avoiding setup"],
+          subCategories: [{ id: "blueprint", label: "Blueprint provision", price: 29.17, unit: "hour" }]
+        },
+        distinction: {
+          name: "Distinction",
+          subtitle: "Outcome-focused academic tutoring",
+          rateLabel: "£29.17/hour",
+          priceDisplay: "£29.17",
+          priceUnit: "/ hour",
+          bestFor: ["Defined grade outcomes", "Subject intervention", "Retention-focused academic support"],
+          baseRate: 29.17,
+          thresholdHours: 200,
+          upliftRate: 0.3,
+          baseService: "Targeted tutoring with explicit academic outcomes, bounded scope, and clear success criteria.",
+          included: ["Outcome-led academic tutoring", "Subject-specific intervention", "Progress against defined academic goal", "Clear product boundary"],
+          notSuitable: ["Unlimited bespoke schooling", "Unbounded academic support", "Broad timetable replacement"],
+          subCategories: [{ id: "distinction", label: "Distinction tutoring", price: 29.17, unit: "hour" }]
+        },
+        compass: {
+          name: "Compass",
+          subtitle: "SEND-informed specialist tutoring",
+          rateLabel: "£37.50/hour",
+          priceDisplay: "£37.50",
+          priceUnit: "/ hour",
+          bestFor: ["SEND-informed tutoring", "ESOL or learning gaps", "Specialist engagement support"],
+          baseRate: 37.5,
+          baseService: "Specialist tutoring informed by SEND, ESOL, learning gaps, and support intensity. It is not therapy.",
+          included: ["Default 1:1 support model", "Minimum 8-week structure", "SEND-informed teaching approach", "Structured communication boundaries"],
+          notSuitable: ["Therapy or clinical intervention", "Unbounded parent support", "Medical or diagnostic provision"],
+          subCategories: [{ id: "compass", label: "Compass support", price: 37.5, unit: "hour" }]
+        }
+      };
+
+      const addonCatalog = {
+        academy: [
+          { id: "none", name: "No add-on", price: 0, unit: "" },
+          { id: "academy_termly_report", name: "Termly progress report", price: 50, unit: "per student / term" },
+          { id: "academy_parent_liaison", name: "Parent liaison session", price: 125, unit: "per session" },
+          { id: "academy_eot_summary", name: "End-of-term summary document", price: 75, unit: "per student / term" },
+          { id: "academy_reintegration", name: "School re-integration planning", price: 291.67, unit: "per student" },
+          { id: "academy_exam_centre", name: "Exam Centre Placement Guarantee", price: 541.67, unit: "per student / exam series", passThrough: "Exam centre fees passed through separately" }
+        ],
+        blueprint: [
+          { id: "none", name: "No add-on", price: 0, unit: "" },
+          { id: "blueprint_level_assessment", name: "Student Level Assessment", price: 125, unit: "per student / subject" },
+          { id: "blueprint_mock_analysis", name: "Mock Exam + Analysis", price: 183.33, unit: "per student / subject / mock" },
+          { id: "blueprint_percentile", name: "High-attainment Percentile Analysis", price: 208.33, unit: "per student / subject" },
+          { id: "blueprint_reintegration", name: "Reintegration Analysis", price: 416.67, unit: "per student" },
+          { id: "blueprint_regrouping", name: "Monthly Regrouping Review", price: 500, unit: "per cohort / month" }
+        ],
+        distinction: [
+          { id: "none", name: "No add-on", price: 0, unit: "" },
+          { id: "dist_mock_admin", name: "Mock Exam Administration", price: 125, unit: "per student / subject / mock" },
+          { id: "dist_marking", name: "Past-paper Marking & Feedback", price: 75, unit: "per paper" },
+          { id: "dist_enhanced_marking", name: "Enhanced Marking with Written Action Plan", price: 116.67, unit: "per paper" },
+          { id: "dist_diagnostic", name: "Monthly Diagnostic Deep-dive", price: 229.17, unit: "per student / subject / month" },
+          { id: "dist_exam_centre", name: "Exam Centre Placement Guarantee", price: 541.67, unit: "per student / exam series", passThrough: "Exam centre, access arrangement, invigilation, and late fees passed through separately" }
+        ],
+        compass: [
+          { id: "none", name: "No add-on", price: 0, unit: "" },
+          { id: "compass_send_report", name: "Monthly SEND-framed progress report", price: 183.33, unit: "per student / month" },
+          { id: "compass_parent_coaching", name: "Parent/carer coaching session", price: 166.67, unit: "per session" },
+          { id: "compass_ta_support", name: "Teaching assistant-style support model", price: 500, unit: "per student / month uplift" },
+          { id: "compass_ehcp", name: "EHCP Annual Review Written Input", price: 541.67, unit: "per student / document" },
+          { id: "compass_multi_agency", name: "Multi-agency meeting attendance", price: 291.67, unit: "per meeting" }
+        ]
+      };
+
+      const stepLabels = [
+        ["Product", "Choose service"],
+        ["Students", "Paste table"],
+        ["Needs", "Confirm rows"],
+        ["Payment", "Stripe or PO"],
+        ["Review", "Submit request"]
+      ];
+
+      const state = {
+        step: 0,
+        product: "academy",
+        paymentMethod: "stripe",
+        studentIdCounter: 3,
+        collapsedStudents: {},
+        collapsedNeeds: {},
+        collapsedGroups: { g1: false },
+        students: [
+          {
+            id: "s1",
+            firstName: "Amelia",
+            surname: "Turner",
+            email: "amelia.turner@northbridgeacademy.org",
+            yearGroup: "Year 9",
+            parentName: "Rebecca Turner",
+            parentEmail: "rebecca.turner@example.com",
+            parentPhone: "07123 456789",
+            subCategory: "core",
+            subject: "Maths",
+            supportProfile: "Learning gaps",
+            groupName: "GA",
+            groupTime: "09:00-10:00",
+            currentGrade: "Grade 3",
+            expectedGrade: "Grade 5",
+            startDate: "2026-04-25",
+            endDate: "2026-06-20",
+            weeks: 8,
+            hoursPerWeek: 2,
+            addonIds: ["academy_termly_report", "academy_parent_liaison"]
+          },
+          {
+            id: "s2",
+            firstName: "Luca",
+            surname: "Evans",
+            email: "luca.evans@northbridgeacademy.org",
+            yearGroup: "Year 9",
+            parentName: "Daniel Evans",
+            parentEmail: "daniel.evans@example.com",
+            parentPhone: "07987 654321",
+            subCategory: "full",
+            subject: "English",
+            supportProfile: "SEND-informed support",
+            groupName: "GB",
+            groupTime: "10:00-11:00",
+            currentGrade: "Grade 4",
+            expectedGrade: "Grade 6",
+            startDate: "2026-04-25",
+            endDate: "2026-06-20",
+            weeks: 8,
+            hoursPerWeek: 2,
+            addonIds: []
+          }
+        ],
+        groups: [
+          {
+            id: "g1",
+            groupName: "GA",
+            subject: "Maths",
+            teachingDays: ["Mon", "Wed"],
+            slot: "09:00-10:00",
+            selectedStudentIds: ["s1", "s2"],
+            currentGrade: "Grade 3",
+            expectedGrade: "Grade 5",
+            startDate: "2026-04-25",
+            endDate: "2026-06-20",
+            addonIds: ["blueprint_level_assessment"]
+          }
+        ]
+      };
+
+      const refs = {
+        progressRow: document.getElementById("progressRow"),
+        productGrid: document.getElementById("productGrid"),
+        studentRows: document.getElementById("studentRows"),
+        needsRows: document.getElementById("needsRows"),
+        paymentOptions: document.getElementById("paymentOptions"),
+        reviewPanel: document.getElementById("reviewPanel"),
+        quoteProduct: document.getElementById("quoteProduct"),
+        quoteSubtitle: document.getElementById("quoteSubtitle"),
+        quoteLines: document.getElementById("quoteLines"),
+        quoteTotal: document.getElementById("quoteTotal"),
+        quotePayment: document.getElementById("quotePayment"),
+        paymentDetail: document.getElementById("paymentDetail"),
+        saveState: document.getElementById("saveState")
+      };
+
+      function formatMoney(value) {
+        return new Intl.NumberFormat("en-GB", {
+          style: "currency",
+          currency: "GBP",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(value);
+      }
+
+      function formatCompactMoney(value) {
+        return new Intl.NumberFormat("en-GB", {
+          style: "currency",
+          currency: "GBP",
+          minimumFractionDigits: Number.isInteger(Number(value)) ? 0 : 2,
+          maximumFractionDigits: 2
+        }).format(value);
+      }
+
+      function toMoneyValue(value) {
+        return Number((Number(value) || 0).toFixed(2));
+      }
+
+      function getProduct() {
+        return products[state.product];
+      }
+
+      function getAddons() {
+        return addonCatalog[state.product] || addonCatalog.academy;
+      }
+
+      function getAddon(id) {
+        return getAddons().find((addon) => addon.id === id) || getAddons()[0];
+      }
+
+      function getPillClass(addon, index) {
+        return addon.passThrough ? "muted" : pillClasses[index % pillClasses.length];
+      }
+
+      function isGroupProduct() {
+        return state.product === "blueprint" || state.product === "distinction";
+      }
+
+      function getSlot(slotId) {
+        return groupSlots.find((slot) => slot.id === slotId) || groupSlots[0];
+      }
+
+      function getStudentById(id) {
+        return state.students.find((student) => student.id === id);
+      }
+
+      function studentName(id) {
+        const student = getStudentById(id);
+        return student ? `${student.firstName || "Student"} ${student.surname || ""}`.trim() : "Student";
+      }
+
+      function getStudentAddons(student) {
+        const ids = Array.isArray(student.addonIds)
+          ? student.addonIds
+          : student.addonId && student.addonId !== "none"
+          ? [student.addonId]
+          : [];
+        return ids.map(getAddon).filter((addon) => addon && addon.id !== "none");
+      }
+
+      function studentAddonQuantity(addon, student) {
+        const weeks = Number(student.weeks || 0);
+        const months = Math.max(1, Math.ceil(weeks / 4));
+        if (addon.unit.includes("per student / month")) return months;
+        return 1;
+      }
+
+      function defaultSubCategory() {
+        return getProduct().subCategories[0].id;
+      }
+
+      function normaliseGroup(group = {}, label = "GA") {
+        return {
+          id: group.id || `g_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+          groupName: group.groupName || label,
+          subject: group.subject || "Maths",
+          teachingDays: Array.isArray(group.teachingDays) && group.teachingDays.length ? group.teachingDays : ["Mon"],
+          slot: group.slot || group.groupTime || "09:00-10:00",
+          selectedStudentIds: Array.isArray(group.selectedStudentIds) && group.selectedStudentIds.length
+            ? group.selectedStudentIds.filter((id) => state.students.some((student) => student.id === id))
+            : state.students.map((student) => student.id),
+          currentGrade: group.currentGrade || "Working towards",
+          expectedGrade: group.expectedGrade || "Expected",
+          startDate: group.startDate || "2026-04-25",
+          endDate: group.endDate || "2026-06-20",
+          addonIds: Array.isArray(group.addonIds) ? group.addonIds.filter((id) => id && id !== "none") : []
+        };
+      }
+
+      function ensureGroups() {
+        if (!isGroupProduct()) return;
+        state.groups = state.groups && state.groups.length ? state.groups.map((group, index) => normaliseGroup(group, groupOptions[index] || "GA")) : [normaliseGroup()];
+      }
+
+      function normaliseStudent(student = {}) {
+        return {
+          id: student.id || `s${state.studentIdCounter++}`,
+          firstName: student.firstName || "",
+          surname: student.surname || "",
+          email: student.email || "",
+          yearGroup: student.yearGroup || "Year 9",
+          parentName: student.parentName || "",
+          parentEmail: student.parentEmail || "",
+          parentPhone: student.parentPhone || "",
+          subCategory: student.subCategory || defaultSubCategory(),
+          subject: student.subject || "Maths",
+          supportProfile: student.supportProfile || "Standard",
+          groupName: student.groupName || "GA",
+          groupTime: student.groupTime || "09:00-10:00",
+          currentGrade: student.currentGrade || "Working towards",
+          expectedGrade: student.expectedGrade || "Expected",
+          startDate: student.startDate || "2026-04-25",
+          endDate: student.endDate || "2026-06-20",
+          weeks: Number(student.weeks || 8),
+          hoursPerWeek: Number(student.hoursPerWeek || 2),
+          addonIds: Array.isArray(student.addonIds)
+            ? student.addonIds.filter((id) => id && id !== "none")
+            : student.addonId && student.addonId !== "none"
+            ? [student.addonId]
+            : []
+        };
+      }
+
+      function calculateStudent(student) {
+        const product = getProduct();
+        const sub = product.subCategories.find((item) => item.id === student.subCategory) || product.subCategories[0];
+        const addons = getStudentAddons(student);
+        let base = 0;
+        let baseLabel = "";
+
+        if (state.product === "academy") {
+          base = toMoneyValue(sub.price * Number(student.weeks || 0));
+          baseLabel = `${sub.label}, ${student.weeks} weeks x ${formatMoney(sub.price)}/week`;
+        } else if (state.product === "blueprint" || state.product === "distinction") {
+          const hours = Number(student.hoursPerWeek || 0) * Number(student.weeks || 0);
+          base = toMoneyValue(hours * sub.price);
+          baseLabel = `${hours} hours x ${formatMoney(sub.price)}/hour`;
+        } else {
+          const hours = Number(student.hoursPerWeek || 0) * Number(student.weeks || 0);
+          base = toMoneyValue(hours * sub.price);
+          baseLabel = `${hours} hours x ${formatMoney(sub.price)}/hour`;
+        }
+
+        const addonLines = addons.map((addon) => {
+          const quantity = studentAddonQuantity(addon, student);
+          return { addon, quantity, total: toMoneyValue(addon.price * quantity) };
+        });
+        const addonTotal = toMoneyValue(addonLines.reduce((sum, line) => sum + line.total, 0));
+        return {
+          student,
+          sub,
+          addons,
+          addonLines,
+          base,
+          baseLabel,
+          addonTotal,
+          total: toMoneyValue(base + addonTotal)
+        };
+      }
+
+      function dateWeeks(startDate, endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return 1;
+        const days = Math.floor((end - start) / 86400000) + 1;
+        return Math.max(1, Math.ceil(days / 7));
+      }
+
+      function groupAddonQuantity(addon, group) {
+        const studentCount = group.selectedStudentIds.length || 1;
+        const months = Math.max(1, Math.ceil(dateWeeks(group.startDate, group.endDate) / 4));
+        if (addon.unit.includes("per student")) return studentCount;
+        if (addon.unit.includes("per cohort / month")) return months;
+        return 1;
+      }
+
+      function calculateGroup(group) {
+        const product = getProduct();
+        const slot = getSlot(group.slot);
+        const weeks = dateWeeks(group.startDate, group.endDate);
+        const sessions = weeks * Math.max(group.teachingDays.length, 1);
+        const hours = sessions * slot.hours;
+        const base = product.baseRate ? toMoneyValue(hours * product.baseRate) : 0;
+        const addons = group.addonIds.map(getAddon).filter((addon) => addon && addon.id !== "none");
+        const addonLines = addons.map((addon) => {
+          const quantity = groupAddonQuantity(addon, group);
+          return { addon, quantity, total: toMoneyValue(addon.price * quantity) };
+        });
+        const addonTotal = toMoneyValue(addonLines.reduce((sum, line) => sum + line.total, 0));
+        return { group, slot, weeks, sessions, hours, base, addonLines, addonTotal, total: toMoneyValue(base + addonTotal) };
+      }
+
+      function calculateQuote() {
+        if (isGroupProduct()) {
+          ensureGroups();
+          const groupLines = state.groups.map(calculateGroup);
+          const subtotal = groupLines.reduce((sum, line) => sum + line.total, 0);
+          const distinctionHours = state.product === "distinction"
+            ? groupLines.reduce((sum, line) => sum + line.hours, 0)
+            : 0;
+          const lowVolumeUplift = state.product === "distinction" && distinctionHours > 0 && distinctionHours < products.distinction.thresholdHours
+            ? toMoneyValue(subtotal * products.distinction.upliftRate)
+            : 0;
+          return { mode: "group", groupLines, lines: [], total: toMoneyValue(subtotal + lowVolumeUplift), lowVolumeUplift, distinctionHours };
+        }
+
+        const lines = state.students.map(calculateStudent);
+        const total = toMoneyValue(lines.reduce((sum, line) => sum + line.total, 0));
+        const distinctionHours = state.product === "distinction"
+          ? state.students.reduce((sum, student) => sum + Number(student.hoursPerWeek || 0) * Number(student.weeks || 0), 0)
+          : 0;
+        const lowVolumeUplift = state.product === "distinction" && distinctionHours > 0 && distinctionHours < products.distinction.thresholdHours
+          ? toMoneyValue(total * products.distinction.upliftRate)
+          : 0;
+        return { mode: "student", lines, groupLines: [], total: toMoneyValue(total + lowVolumeUplift), lowVolumeUplift, distinctionHours };
+      }
+
+      function paymentLabel() {
+        const poNumber = document.getElementById("poNumber")?.value || "";
+        const poToFollow = document.getElementById("poToFollow")?.checked || false;
+        if (state.paymentMethod === "stripe") return "Stripe card payment selected";
+        if (poNumber) return `PO confirmation selected, PO ${poNumber}`;
+        if (poToFollow) return "PO confirmation selected, PO to follow";
+        return "PO confirmation selected, PO number pending";
+      }
+
+      function renderProgress() {
+        refs.progressRow.innerHTML = stepLabels.map((label, index) => {
+          let cls = "";
+          if (index < state.step) cls = "done";
+          if (index === state.step) cls = "active";
+          return `
+            <div class="progress-step ${cls}" data-progress-step="${index}" role="button" tabindex="0">
+              <div class="step-dot">${index < state.step ? "✓" : index + 1}</div>
+              <div>
+                <strong>${label[0]}</strong>
+                <span>${label[1]}</span>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function renderProducts() {
+        const bullets = (items, extraClass = "") => `
+          <ul class="compact-bullets ${extraClass}">
+            ${items.map((item) => `<li>${item}</li>`).join("")}
+          </ul>
+        `;
+        const boundaryList = (items) => `
+          <ul class="boundary-list">
+            ${items.map((item) => `
+              <li>
+                <span class="boundary-icon" aria-hidden="true">❌</span>
+                <span>${item}</span>
+              </li>
+            `).join("")}
+          </ul>
+        `;
+        const includedList = (items) => `
+          <ul class="included-list">
+            ${items.map((item) => `
+              <li>
+                <span class="included-icon" aria-hidden="true">✅</span>
+                <span>${item}</span>
+              </li>
+            `).join("")}
+          </ul>
+        `;
+        const addonOptions = (key) => {
+          const addons = (addonCatalog[key] || []).filter((addon) => addon.id !== "none");
+          const visible = addons.slice(0, 4).map((addon, index) => `
+            <span class="option-pill ${getPillClass(addon, index)}">
+              ${addon.name}
+            </span>
+          `).join("");
+          const more = addons.length > 4 ? `<span class="option-pill muted">+${addons.length - 4} more</span>` : "";
+          return `<div class="addon-strip">${visible}${more}</div>`;
+        };
+        refs.productGrid.innerHTML = Object.entries(products).map(([key, product]) => `
+          <article class="product-card ${state.product === key ? "selected" : ""}" data-product="${key}" role="button" tabindex="0">
+            <div class="product-head">
+              <div>
+                <span class="tag">${product.name}</span>
+                <h3>${product.subtitle}</h3>
+              </div>
+              <div class="price-block">
+                ${key === "academy" ? `
+                  <div class="price-stack">
+                    <div class="price-row">£139 <span>Core</span></div>
+                    <div class="price-row">£169 <span>Full</span></div>
+                  </div>
+                ` : `<span class="price-main">${product.priceDisplay}</span>`}
+                <span class="price-unit">${product.priceUnit}</span>
+                ${key === "compass" ? `<span class="tag teal" style="margin-top: 7px;">SEND-informed</span>` : ""}
+              </div>
+            </div>
+            <p class="muted">${product.baseService}</p>
+            <div class="product-summary">
+              <div class="summary-row">
+                <div class="summary-label">Best for</div>
+                <div class="summary-text">${bullets(product.bestFor)}</div>
+              </div>
+              <div class="summary-row">
+                <div class="summary-label">Included</div>
+                <div class="summary-text">${includedList(product.included)}</div>
+              </div>
+              <div class="summary-row danger">
+                <div class="summary-label">Not suitable</div>
+                <div class="summary-text danger">${boundaryList(product.notSuitable)}</div>
+              </div>
+              <div class="summary-row">
+                <div class="summary-label">Add-ons</div>
+                <div class="summary-text">${addonOptions(key)}</div>
+              </div>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      function renderStudentRows() {
+        refs.studentRows.innerHTML = `
+          <div class="button-row" style="margin-bottom: 4px;">
+            <button class="btn ghost" type="button" data-collapse-students="all">Collapse all</button>
+            <button class="btn ghost" type="button" data-expand-students="all">Expand all</button>
+          </div>
+          ${state.students.map((student, index) => `
+          <article class="student-card ${state.collapsedStudents[student.id] ? "collapsed" : ""}">
+            <div class="student-card-head">
+              <div>
+                <h3>${student.firstName || "Student"} ${student.surname || index + 1}</h3>
+                <p class="muted">${student.email || "Email missing"} - ${student.yearGroup || "Year group missing"}</p>
+              </div>
+              <div class="button-row">
+                <button class="btn ghost" type="button" data-toggle-student-card="${student.id}">${state.collapsedStudents[student.id] ? "Expand" : "Collapse"}</button>
+                <button class="btn remove" type="button" data-remove-student="${index}">Remove</button>
+              </div>
+            </div>
+            <div class="student-fields">
+              <div class="field">
+                <label>First name</label>
+                <input value="${student.firstName}" data-student="${index}" data-field="firstName" />
+              </div>
+              <div class="field">
+                <label>Surname</label>
+                <input value="${student.surname}" data-student="${index}" data-field="surname" />
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input value="${student.email}" data-student="${index}" data-field="email" />
+              </div>
+              <div class="field">
+                <label>Year group</label>
+                <select data-student="${index}" data-field="yearGroup">
+                  ${yearGroups.map((year) => `<option ${student.yearGroup === year ? "selected" : ""}>${year}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label>Parent/carer name</label>
+                <input value="${student.parentName}" data-student="${index}" data-field="parentName" />
+              </div>
+              <div class="field">
+                <label>Parent/carer email</label>
+                <input value="${student.parentEmail}" data-student="${index}" data-field="parentEmail" />
+              </div>
+              <div class="field">
+                <label>Parent/carer phone</label>
+                <input value="${student.parentPhone}" data-student="${index}" data-field="parentPhone" />
+              </div>
+            </div>
+          </article>
+        `).join("")}
+        `;
+      }
+
+      function renderNeedsRows() {
+        if (isGroupProduct()) {
+          renderGroupNeedsRows();
+          return;
+        }
+
+        const product = getProduct();
+        const addons = getAddons();
+        refs.needsRows.innerHTML = `
+          <div class="button-row" style="margin-bottom: 12px;">
+            <span class="tag">You are configuring ${product.name}</span>
+            <button class="btn ghost" type="button" data-collapse-needs="all">Collapse all</button>
+            <button class="btn ghost" type="button" data-expand-needs="all">Expand all</button>
+          </div>
+          ${state.students.map((student, index) => `
+          <article class="needs-card ${state.collapsedNeeds[student.id] ? "collapsed" : ""}">
+            <div class="needs-card-head">
+              <div>
+                <h3>${student.firstName || "Student"} ${student.surname || ""}</h3>
+                <p class="muted">${student.yearGroup} - ${student.email || "Email missing"}</p>
+              </div>
+              <div class="button-row">
+                <span class="tag">${product.subCategories.find((item) => item.id === student.subCategory)?.label || product.subCategories[0].label}</span>
+                <button class="btn ghost" type="button" data-toggle-needs-card="${student.id}">${state.collapsedNeeds[student.id] ? "Expand" : "Collapse"}</button>
+              </div>
+            </div>
+            <div class="needs-fields">
+              <div class="field field-wide">
+                <label>Sub-category</label>
+                <select data-student="${index}" data-field="subCategory">
+                  ${product.subCategories.map((sub) => `<option value="${sub.id}" ${student.subCategory === sub.id ? "selected" : ""}>${sub.label}${sub.price ? ` - ${formatCompactMoney(sub.price)}/${sub.unit}` : ""}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label>Subject / focus</label>
+                <select data-student="${index}" data-field="subject">
+                  ${subjects.map((subject) => `<option ${student.subject === subject ? "selected" : ""}>${subject}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label>Support profile</label>
+                <select data-student="${index}" data-field="supportProfile">
+                  ${supportProfiles.map((profile) => `<option ${student.supportProfile === profile ? "selected" : ""}>${profile}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label>Start date</label>
+                <input type="date" value="${student.startDate}" data-student="${index}" data-field="startDate" />
+              </div>
+              <div class="field">
+                <label>End date</label>
+                <input type="date" value="${student.endDate}" data-student="${index}" data-field="endDate" />
+              </div>
+              <div class="field">
+                <label>Weeks</label>
+                <select data-student="${index}" data-field="weeks">
+                  ${[4, 6, 8, 12, 16].map((weeks) => `<option value="${weeks}" ${Number(student.weeks) === weeks ? "selected" : ""}>${weeks}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label>Hours / week</label>
+                <select data-student="${index}" data-field="hoursPerWeek" ${state.product === "academy" ? "disabled" : ""}>
+                  ${[1, 2, 3, 4, 5, 6].map((hours) => `<option value="${hours}" ${Number(student.hoursPerWeek) === hours ? "selected" : ""}>${hours}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+            <div class="addon-options">
+              <strong>Add-ons, optional multi-select</strong>
+              <div class="addon-option-grid">
+                ${addons.filter((addon) => addon.id !== "none").map((addon, addonIndex) => `
+                  <label class="addon-check">
+                    <input type="checkbox" data-addon-toggle="${addon.id}" data-student="${index}" ${student.addonIds?.includes(addon.id) ? "checked" : ""} />
+                    <span class="addon-option-content">
+                      <span class="option-pill ${getPillClass(addon, addonIndex)}">${addon.name}</span>
+                      <span class="addon-note">${addon.unit}${addon.passThrough ? " · centre fees passed through" : ""}</span>
+                    </span>
+                  </label>
+                `).join("")}
+              </div>
+            </div>
+          </article>
+        `).join("")}
+        `;
+      }
+
+      function renderGroupNeedsRows() {
+        ensureGroups();
+        const addons = getAddons();
+        refs.needsRows.innerHTML = `
+          <div class="button-row" style="margin-bottom: 12px;">
+            <button class="btn secondary" type="button" id="addGroup">Add group</button>
+            <span class="muted">Create groups by subject, teaching day, slot, selected students and grade target.</span>
+          </div>
+          ${state.groups.map((group, groupIndex) => {
+            const groupLine = calculateGroup(group);
+            return `
+            <article class="group-card ${state.collapsedGroups[group.id] ? "collapsed" : ""}">
+              <div class="group-card-head">
+                <div>
+                  <h3>${group.groupName} group need</h3>
+                  <p class="muted">${group.subject} - ${group.teachingDays.join(", ")} - ${getSlot(group.slot).label}</p>
+                  <p class="muted">Calculated: ${groupLine.hours} hours over ${groupLine.sessions} sessions</p>
+                </div>
+                <div class="button-row">
+                  <span class="tag">${group.subject}</span>
+                  <button class="btn ghost" type="button" data-toggle-group-card="${group.id}">${state.collapsedGroups[group.id] ? "Expand" : "Collapse"}</button>
+                  <button class="btn secondary" type="button" data-remove-group="${groupIndex}">Remove group</button>
+                </div>
+              </div>
+              <div class="group-body">
+                <div class="group-section">
+                  <h4>Group basics</h4>
+                  <div class="needs-fields">
+                    <div class="field">
+                      <label>Group</label>
+                      <select data-group="${groupIndex}" data-group-field="groupName">
+                        ${groupOptions.map((name) => `<option ${group.groupName === name ? "selected" : ""}>${name}</option>`).join("")}
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label>Subject</label>
+                      <select data-group="${groupIndex}" data-group-field="subject">
+                        ${subjects.map((subject) => `<option ${group.subject === subject ? "selected" : ""}>${subject}</option>`).join("")}
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label>Current grade</label>
+                      <select data-group="${groupIndex}" data-group-field="currentGrade">
+                        ${gradeOptions.map((grade) => `<option ${group.currentGrade === grade ? "selected" : ""}>${grade}</option>`).join("")}
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label>Expected grade</label>
+                      <select data-group="${groupIndex}" data-group-field="expectedGrade">
+                        ${gradeOptions.map((grade) => `<option ${group.expectedGrade === grade ? "selected" : ""}>${grade}</option>`).join("")}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="group-section">
+                  <h4>Schedule</h4>
+                  <div class="needs-fields">
+                    <div class="field">
+                      <label>Start date</label>
+                      <input type="date" value="${group.startDate}" data-group="${groupIndex}" data-group-field="startDate" />
+                    </div>
+                    <div class="field">
+                      <label>End date</label>
+                      <input type="date" value="${group.endDate}" data-group="${groupIndex}" data-group-field="endDate" />
+                    </div>
+                    <div class="field">
+                      <label>Slot</label>
+                      <select data-group="${groupIndex}" data-group-field="slot">
+                        ${groupSlots.map((slot) => `<option value="${slot.id}" ${group.slot === slot.id ? "selected" : ""}>${slot.label}</option>`).join("")}
+                      </select>
+                    </div>
+                  </div>
+                  <div style="margin-top: 10px;">
+                    <strong>Teaching days</strong>
+                    <div class="day-grid" style="margin-top: 8px;">
+                      ${teachingDays.map((day) => `
+                        <label class="day-check">
+                          <input type="checkbox" data-group-day="${day}" data-group="${groupIndex}" ${group.teachingDays.includes(day) ? "checked" : ""} />
+                          ${day}
+                        </label>
+                      `).join("")}
+                    </div>
+                  </div>
+                </div>
+                <div class="group-section">
+                  <h4>Students in this group</h4>
+                  <div class="student-chip-grid">
+                    ${state.students.map((student) => `
+                      <label class="student-chip">
+                        <input type="checkbox" data-group-student="${student.id}" data-group="${groupIndex}" ${group.selectedStudentIds.includes(student.id) ? "checked" : ""} />
+                        ${student.firstName || "Student"} ${student.surname || ""}
+                      </label>
+                    `).join("")}
+                  </div>
+                </div>
+                <div class="group-section">
+                  <h4>Add-ons, optional multi-select</h4>
+                  <div class="addon-option-grid">
+                    ${addons.filter((addon) => addon.id !== "none").map((addon, addonIndex) => `
+                      <label class="addon-check">
+                        <input type="checkbox" data-group-addon="${addon.id}" data-group="${groupIndex}" ${group.addonIds.includes(addon.id) ? "checked" : ""} />
+                        <span class="addon-option-content">
+                          <span class="option-pill ${getPillClass(addon, addonIndex)}">${addon.name}</span>
+                          <span class="addon-note">${addon.unit}${addon.passThrough ? " · centre fees passed through" : ""}</span>
+                        </span>
+                      </label>
+                    `).join("")}
+                  </div>
+                </div>
+                <div class="group-footer">
+                  <span>Calculated: ${groupLine.hours} hours over ${groupLine.sessions} sessions</span>
+                  <strong>Group subtotal ${formatMoney(groupLine.total)}</strong>
+                </div>
+              </div>
+            </article>
+          `;
+          }).join("")}
+        `;
+      }
+
+      function renderPaymentOptions() {
+        refs.paymentOptions.innerHTML = [
+          ["stripe", "▣", "Pay by card via Stripe", "Creates a secure Stripe payment path and stores the payment reference.", "Secure via Stripe"],
+          ["po", "▤", "Generate PO confirmation", "Creates a PO confirmation reference for school or Local Authority finance.", "School / LA finance"]
+        ].map((option) => `
+          <article class="payment-option ${state.paymentMethod === option[0] ? "selected" : ""}">
+            <label>
+              <input type="radio" name="paymentMethod" value="${option[0]}" ${state.paymentMethod === option[0] ? "checked" : ""} />
+              <span>
+                <span class="tag">${option[1]}</span>
+                <strong style="display: block; margin-top: 8px;">${option[2]}</strong>
+                <span class="muted">${option[3]}</span>
+                <span class="tag teal" style="margin-top: 10px;">${option[4]}</span>
+              </span>
+            </label>
+          </article>
+        `).join("");
+      }
+
+      function renderPaymentDetail() {
+        const quote = calculateQuote();
+        if (state.paymentMethod === "stripe") {
+          refs.paymentDetail.innerHTML = `
+            <span class="tag teal">Secure via Stripe</span>
+            <h3 style="margin-top: 10px;">Amount to be charged</h3>
+            <div class="quote-total" style="margin-top: 10px;">
+              <span>Total excl. VAT</span>
+              <strong>${formatMoney(quote.total)}</strong>
+            </div>
+            <p class="muted" style="margin-top: 10px;">VAT is added at invoice or checkout. In production this can launch Stripe Checkout, Stripe Invoice, or a Payment Link depending on client type.</p>
+          `;
+          return;
+        }
+
+        refs.paymentDetail.innerHTML = `
+          <span class="tag teal">School / LA finance</span>
+          <h3 style="margin-top: 10px;">PO confirmation</h3>
+          <div class="field" style="margin-top: 12px;">
+            <label for="poNumber">PO number</label>
+            <input id="poNumber" placeholder="Enter PO number if available" />
+          </div>
+          <label class="inline-check" style="margin-top: 12px;">
+            <input id="poToFollow" type="checkbox" />
+            <span>
+              <strong>PO to follow</strong>
+              <span class="muted">Record the request while finance prepares the PO.</span>
+            </span>
+          </label>
+          <div class="field" style="margin-top: 12px;">
+            <label for="billingNotes">Billing notes</label>
+            <textarea id="billingNotes" placeholder="Add billing instructions or finance notes"></textarea>
+          </div>
+        `;
+      }
+
+      function renderQuote() {
+        const product = getProduct();
+        const quote = calculateQuote();
+        const vatAmount = quote.total * 0.2;
+        const totalInclVat = quote.total + vatAmount;
+        refs.quoteProduct.textContent = product.name;
+        refs.quoteSubtitle.textContent = `${product.subtitle} - ${product.rateLabel}`;
+        if (quote.mode === "group") {
+          refs.quoteLines.innerHTML = quote.groupLines.length ? quote.groupLines.map((line) => `
+            <div class="quote-student">
+              <strong>${line.group.groupName} - ${line.group.subject}</strong>
+              <div class="muted">${line.group.teachingDays.join(", ")} ${line.slot.label} - ${line.group.currentGrade} to ${line.group.expectedGrade}</div>
+              <div class="muted">Students: ${line.group.selectedStudentIds.map(studentName).join(", ") || "None selected"}</div>
+              <div class="quote-line"><span>${line.sessions} sessions / ${line.hours} hours x ${formatMoney(product.baseRate)}/hour</span><strong>${formatMoney(line.base)}</strong></div>
+              ${line.addonLines.map((addonLine) => `
+                <div class="quote-line addon-line">
+                  <div class="addon-line-label">
+                    <button class="addon-remove" type="button" data-remove-group-addon="${addonLine.addon.id}" data-group-id="${line.group.id}" aria-label="Remove add-on ${addonLine.addon.name}">×</button>
+                    <span class="addon-name">
+                      <span class="addon-kicker">Add-on</span>
+                      <span class="addon-title">${addonLine.addon.name}${addonLine.quantity > 1 ? ` x ${addonLine.quantity}` : ""}</span>
+                    </span>
+                  </div>
+                  <strong>${formatMoney(addonLine.total)}</strong>
+                </div>
+                ${addonLine.addon.passThrough ? `<div class="pass-through-line"><span><span class="tag muted">Pass-through</span> ${addonLine.addon.passThrough}</span><strong>TBC</strong></div>` : ""}
+              `).join("")}
+              <div class="quote-line"><span>Group subtotal</span><strong>${formatMoney(line.total)}</strong></div>
+            </div>
+          `).join("") : `<p class="muted">Add groups to build the quote.</p>`;
+        } else {
+          refs.quoteLines.innerHTML = quote.lines.length ? quote.lines.map((line) => `
+            <div class="quote-student">
+              <strong>${line.student.firstName || "Student"} ${line.student.surname || ""}</strong>
+              <div class="quote-line"><span>${line.baseLabel}</span><strong>${line.base ? formatMoney(line.base) : "TBC"}</strong></div>
+              ${line.addonLines.map((addonLine) => `
+                <div class="quote-line addon-line">
+                  <div class="addon-line-label">
+                    <button class="addon-remove" type="button" data-remove-student-addon="${addonLine.addon.id}" data-student-id="${line.student.id}" aria-label="Remove add-on ${addonLine.addon.name}">×</button>
+                    <span class="addon-name">
+                      <span class="addon-kicker">Add-on</span>
+                      <span class="addon-title">${addonLine.addon.name}${addonLine.quantity > 1 ? ` x ${addonLine.quantity}` : ""}</span>
+                    </span>
+                  </div>
+                  <strong>${formatMoney(addonLine.total)}</strong>
+                </div>
+                ${addonLine.addon.passThrough ? `<div class="pass-through-line"><span><span class="tag muted">Pass-through</span> ${addonLine.addon.passThrough}</span><strong>subject to centre</strong></div>` : ""}
+              `).join("")}
+              <div class="quote-line"><span>Student subtotal</span><strong>${formatMoney(line.total)}</strong></div>
+            </div>
+          `).join("") : `<p class="muted">Add students to build the quote.</p>`;
+        }
+
+        if (quote.lowVolumeUplift) {
+          refs.quoteLines.innerHTML += `
+            <div class="uplift-line" title="(base + add-ons) × 30% uplift">
+              <div><span class="tag amber">Auto-applied</span></div>
+              <strong>Distinction low-volume uplift</strong>
+              <div class="quote-line"><span>Distinction total is ${quote.distinctionHours} hours, under 200 hours threshold</span><strong>${formatMoney(quote.lowVolumeUplift)}</strong></div>
+            </div>
+          `;
+        }
+
+        refs.quoteTotal.textContent = formatMoney(quote.total);
+        document.getElementById("quoteVatNote").textContent = `VAT @20%: ${formatMoney(vatAmount)} · Total incl. VAT: ${formatMoney(totalInclVat)}`;
+        refs.quotePayment.textContent = paymentLabel();
+      }
+
+      function renderReview() {
+        const quote = calculateQuote();
+        const needLines = quote.mode === "group"
+          ? quote.groupLines.map((line) => `<li>${line.group.groupName} - ${line.group.subject} - ${line.group.teachingDays.join(", ")} ${line.slot.label} - ${line.group.currentGrade} to ${line.group.expectedGrade} - students: ${line.group.selectedStudentIds.map(studentName).join(", ") || "None selected"}</li>`).join("")
+          : quote.lines.map((line) => `<li>${line.student.firstName} ${line.student.surname} - ${line.sub.label} - ${line.student.subject} - ${line.student.weeks} weeks - ${line.addons.length ? line.addons.map((addon) => addon.name).join(", ") : "No add-ons"}</li>`).join("");
+        const quoteLines = quote.mode === "group"
+          ? quote.groupLines.map((line) => `<li>${line.group.groupName}: ${formatMoney(line.total)}</li>`).join("")
+          : quote.lines.map((line) => `<li>${line.student.firstName} ${line.student.surname}: ${formatMoney(line.total)}</li>`).join("");
+        refs.reviewPanel.innerHTML = `
+          <div class="review-box">
+            <div class="quote-line"><h3>Selected product</h3><button class="btn ghost" type="button" data-jump-step="0">Edit</button></div>
+            <p><strong>${getProduct().name}</strong> - ${getProduct().subtitle}</p>
+            <p class="muted">${getProduct().baseService}</p>
+          </div>
+          <div class="review-box">
+            <div class="quote-line"><h3>Students and needs</h3><button class="btn ghost" type="button" data-jump-step="2">Edit</button></div>
+            <ul class="list">
+              ${needLines}
+            </ul>
+          </div>
+          <div class="review-box">
+            <div class="quote-line"><h3>Quote sheet</h3><button class="btn ghost" type="button" data-jump-step="2">Edit</button></div>
+            <ul class="list">
+              ${quoteLines}
+              ${quote.lowVolumeUplift ? `<li>Low-volume uplift: ${formatMoney(quote.lowVolumeUplift)}</li>` : ""}
+              <li><strong>Total: ${formatMoney(quote.total)}</strong></li>
+            </ul>
+          </div>
+          <div class="review-box">
+            <div class="quote-line"><h3>Payment / PO</h3><button class="btn ghost" type="button" data-jump-step="3">Edit</button></div>
+            <p class="muted">${paymentLabel()}</p>
+          </div>
+        `;
+      }
+
+      function renderStep() {
+        document.querySelectorAll(".step").forEach((step) => {
+          step.classList.toggle("active", Number(step.dataset.step) === state.step);
+        });
+
+        document.getElementById("backBtn").classList.toggle("hide", state.step === 0 || state.step === 5);
+        document.getElementById("saveBtn").classList.toggle("hide", state.step === 5);
+
+        const nextBtn = document.getElementById("nextBtn");
+        if (state.step === 4) {
+          nextBtn.textContent = "Submit request";
+          nextBtn.classList.remove("hide");
+        } else if (state.step === 5) {
+          nextBtn.classList.add("hide");
+        } else {
+          nextBtn.textContent = "Continue";
+          nextBtn.classList.remove("hide");
+        }
+
+        renderProgress();
+        if (state.step === 0) renderProducts();
+        if (state.step === 1) renderStudentRows();
+        if (state.step === 2) renderNeedsRows();
+        if (state.step === 3) {
+          renderPaymentOptions();
+          renderPaymentDetail();
+        }
+        if (state.step === 4) renderReview();
+        renderQuote();
+      }
+
+      function renderAll() {
+        renderProducts();
+        renderStudentRows();
+        renderNeedsRows();
+        renderPaymentOptions();
+        renderPaymentDetail();
+        renderQuote();
+        renderProgress();
+      }
+
+      function saveDraft() {
+        refs.saveState.textContent = "Draft saved just now";
+      }
+
+      function parsePastedRows() {
+        const value = document.getElementById("pasteArea").value.trim();
+        if (!value) return;
+        const rows = value.split(/\r?\n/).map((row) => row.split(/\t|,/).map((cell) => cell.trim()));
+        const filtered = rows.filter((row) => row.some(Boolean));
+        const withoutHeader = filtered[0] && /first|surname|email/i.test(filtered[0].join(" "))
+          ? filtered.slice(1)
+          : filtered;
+
+        state.students = withoutHeader.map((row) => normaliseStudent({
+          firstName: row[0],
+          surname: row[1],
+          email: row[2],
+          yearGroup: row[3],
+          parentName: row[4],
+          parentEmail: row[5],
+          parentPhone: row[6]
+        }));
+
+        if (!state.students.length) state.students = [normaliseStudent()];
+        if (isGroupProduct()) {
+          state.groups = [normaliseGroup({
+            ...state.groups[0],
+            selectedStudentIds: state.students.map((student) => student.id)
+          })];
+        }
+        renderAll();
+        renderStep();
+        saveDraft();
+      }
+
+      document.addEventListener("click", (event) => {
+        const removeStudentAddon = event.target.closest("[data-remove-student-addon]");
+        if (removeStudentAddon) {
+          const student = state.students.find((item) => item.id === removeStudentAddon.dataset.studentId);
+          if (student) {
+            student.addonIds = (student.addonIds || []).filter((id) => id !== removeStudentAddon.dataset.removeStudentAddon);
+            renderStep();
+            saveDraft();
+          }
+          return;
+        }
+
+        const removeGroupAddon = event.target.closest("[data-remove-group-addon]");
+        if (removeGroupAddon) {
+          const group = state.groups.find((item) => item.id === removeGroupAddon.dataset.groupId);
+          if (group) {
+            group.addonIds = (group.addonIds || []).filter((id) => id !== removeGroupAddon.dataset.removeGroupAddon);
+            renderStep();
+            saveDraft();
+          }
+          return;
+        }
+
+        const productCard = event.target.closest("[data-product]");
+        if (productCard) {
+          state.product = productCard.dataset.product;
+          state.students = state.students.map((student) => normaliseStudent({
+            ...student,
+            subCategory: products[state.product].subCategories[0].id,
+            addonIds: []
+          }));
+          if (isGroupProduct()) ensureGroups();
+          renderAll();
+          saveDraft();
+          return;
+        }
+
+        const progressStep = event.target.closest("[data-progress-step]");
+        if (progressStep) {
+          state.step = Number(progressStep.dataset.progressStep);
+          renderStep();
+          return;
+        }
+
+        const jumpStep = event.target.closest("[data-jump-step]");
+        if (jumpStep) {
+          state.step = Number(jumpStep.dataset.jumpStep);
+          renderStep();
+          return;
+        }
+
+        const toggleStudentCard = event.target.dataset.toggleStudentCard;
+        if (toggleStudentCard) {
+          state.collapsedStudents[toggleStudentCard] = !state.collapsedStudents[toggleStudentCard];
+          renderStudentRows();
+          return;
+        }
+
+        if (event.target.dataset.collapseStudents) {
+          state.students.forEach((student) => {
+            state.collapsedStudents[student.id] = true;
+          });
+          renderStudentRows();
+          return;
+        }
+
+        if (event.target.dataset.expandStudents) {
+          state.collapsedStudents = {};
+          renderStudentRows();
+          return;
+        }
+
+        const toggleNeedsCard = event.target.dataset.toggleNeedsCard;
+        if (toggleNeedsCard) {
+          state.collapsedNeeds[toggleNeedsCard] = !state.collapsedNeeds[toggleNeedsCard];
+          renderNeedsRows();
+          return;
+        }
+
+        if (event.target.dataset.collapseNeeds) {
+          state.students.forEach((student) => {
+            state.collapsedNeeds[student.id] = true;
+          });
+          renderNeedsRows();
+          return;
+        }
+
+        if (event.target.dataset.expandNeeds) {
+          state.collapsedNeeds = {};
+          renderNeedsRows();
+          return;
+        }
+
+        const toggleGroupCard = event.target.dataset.toggleGroupCard;
+        if (toggleGroupCard) {
+          state.collapsedGroups[toggleGroupCard] = !state.collapsedGroups[toggleGroupCard];
+          renderNeedsRows();
+          return;
+        }
+
+        if (event.target.id === "parsePaste") {
+          parsePastedRows();
+          return;
+        }
+
+        if (event.target.id === "addStudent") {
+          const student = normaliseStudent();
+          state.students.push(student);
+          if (isGroupProduct() && state.groups[0]) state.groups[0].selectedStudentIds.push(student.id);
+          renderAll();
+          saveDraft();
+          return;
+        }
+
+        if (event.target.id === "addGroup") {
+          ensureGroups();
+          const label = groupOptions[state.groups.length] || `G${state.groups.length + 1}`;
+          const group = normaliseGroup({}, label);
+          state.groups.push(group);
+          state.collapsedGroups[group.id] = true;
+          renderAll();
+          saveDraft();
+          return;
+        }
+
+        if (event.target.id === "loadSample") {
+          document.getElementById("pasteArea").value = [
+            "Amelia\tTurner\tamelia.turner@school.org\tYear 9\tRebecca Turner\trebecca.turner@example.com\t07123 456789",
+            "Luca\tEvans\tluca.evans@school.org\tYear 9\tDaniel Evans\tdaniel.evans@example.com\t07987 654321",
+            "Maya\tPatel\tmaya.patel@school.org\tYear 10\tAnika Patel\tanika.patel@example.com\t07000 123456"
+          ].join("\n");
+          return;
+        }
+
+        const removeIndex = event.target.dataset.removeStudent;
+        if (removeIndex !== undefined) {
+          const removed = state.students.splice(Number(removeIndex), 1)[0];
+          if (removed) {
+            state.groups = state.groups.map((group) => ({
+              ...group,
+              selectedStudentIds: group.selectedStudentIds.filter((id) => id !== removed.id)
+            }));
+          }
+          renderAll();
+          saveDraft();
+          return;
+        }
+
+        const removeGroup = event.target.dataset.removeGroup;
+        if (removeGroup !== undefined) {
+          state.groups.splice(Number(removeGroup), 1);
+          if (!state.groups.length) state.groups.push(normaliseGroup());
+          renderAll();
+          saveDraft();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const interactiveCard = event.target.closest("[data-product], [data-progress-step]");
+        if (!interactiveCard) return;
+        event.preventDefault();
+        interactiveCard.click();
+      });
+
+      document.addEventListener("input", (event) => {
+        const index = event.target.dataset.student;
+        const field = event.target.dataset.field;
+        if (index !== undefined && field) {
+          state.students[Number(index)][field] = event.target.value;
+          renderQuote();
+        }
+      });
+
+      document.addEventListener("change", (event) => {
+        const index = event.target.dataset.student;
+        const field = event.target.dataset.field;
+        const groupIndex = event.target.dataset.group;
+        const groupField = event.target.dataset.groupField;
+
+        if (groupIndex !== undefined && groupField) {
+          state.groups[Number(groupIndex)][groupField] = event.target.value;
+          renderNeedsRows();
+          renderQuote();
+          saveDraft();
+          return;
+        }
+
+        const groupDay = event.target.dataset.groupDay;
+        if (groupIndex !== undefined && groupDay) {
+          const group = state.groups[Number(groupIndex)];
+          if (event.target.checked && !group.teachingDays.includes(groupDay)) group.teachingDays.push(groupDay);
+          if (!event.target.checked) group.teachingDays = group.teachingDays.filter((day) => day !== groupDay);
+          if (!group.teachingDays.length) group.teachingDays = [groupDay];
+          renderNeedsRows();
+          renderQuote();
+          saveDraft();
+          return;
+        }
+
+        const groupStudent = event.target.dataset.groupStudent;
+        if (groupIndex !== undefined && groupStudent) {
+          const group = state.groups[Number(groupIndex)];
+          if (event.target.checked && !group.selectedStudentIds.includes(groupStudent)) group.selectedStudentIds.push(groupStudent);
+          if (!event.target.checked) group.selectedStudentIds = group.selectedStudentIds.filter((id) => id !== groupStudent);
+          renderNeedsRows();
+          renderQuote();
+          saveDraft();
+          return;
+        }
+
+        const groupAddon = event.target.dataset.groupAddon;
+        if (groupIndex !== undefined && groupAddon) {
+          const group = state.groups[Number(groupIndex)];
+          if (!Array.isArray(group.addonIds)) group.addonIds = [];
+          if (event.target.checked && !group.addonIds.includes(groupAddon)) group.addonIds.push(groupAddon);
+          if (!event.target.checked) group.addonIds = group.addonIds.filter((id) => id !== groupAddon);
+          renderQuote();
+          saveDraft();
+          return;
+        }
+
+        const addonToggle = event.target.dataset.addonToggle;
+        if (index !== undefined && addonToggle) {
+          const student = state.students[Number(index)];
+          if (!Array.isArray(student.addonIds)) student.addonIds = [];
+          if (event.target.checked && !student.addonIds.includes(addonToggle)) {
+            student.addonIds.push(addonToggle);
+          }
+          if (!event.target.checked) {
+            student.addonIds = student.addonIds.filter((id) => id !== addonToggle);
+          }
+          renderQuote();
+          saveDraft();
+          return;
+        }
+
+        if (index !== undefined && field) {
+          state.students[Number(index)][field] = event.target.value;
+          renderQuote();
+          saveDraft();
+        }
+
+        if (event.target.name === "paymentMethod") {
+          state.paymentMethod = event.target.value;
+          renderPaymentOptions();
+          renderPaymentDetail();
+          renderQuote();
+          saveDraft();
+        }
+
+        if (event.target.id === "poToFollow") renderQuote();
+      });
+
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        if (state.step < 4) state.step += 1;
+        else if (state.step === 4) state.step = 5;
+        renderStep();
+      });
+
+      document.getElementById("backBtn").addEventListener("click", () => {
+        if (state.step > 0) state.step -= 1;
+        renderStep();
+      });
+
+      document.getElementById("saveBtn").addEventListener("click", saveDraft);
+
+      renderAll();
+      renderStep();
+    </script>
+  </body>
+</html>
