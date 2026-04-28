@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purple Ruler Enrolment Review Guide</title>
+    <style>
+      :root {
+        --bg: #f7f5f8;
+        --surface: #ffffff;
+        --soft: #f1edf5;
+        --text: #22162e;
+        --muted: #665d70;
+        --brand: #5a2a84;
+        --brand-2: #7b50b0;
+        --teal: #24746e;
+        --amber: #a36515;
+        --danger: #96384b;
+        --success: #1f6b3a;
+        --line: #ded6e7;
+        --line-strong: #c9bdd7;
+        --shadow: 0 16px 38px rgba(35, 21, 48, 0.08);
+        --radius: 12px;
+        --max: 1280px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(90, 42, 132, 0.08), transparent 34rem),
+          linear-gradient(180deg, #fbfafc, var(--bg));
+        font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      a {
+        color: var(--brand);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .app {
+        width: min(100% - 32px, var(--max));
+        margin: 0 auto;
+        padding: 24px 0 44px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        color: #fff;
+        background: var(--brand);
+        font-weight: 800;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .hero {
+        padding: 30px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .eyebrow {
+        color: var(--brand);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .hero h1 {
+        max-width: 900px;
+        margin-top: 8px;
+        font-size: clamp(32px, 5vw, 56px);
+        line-height: 1.02;
+        font-weight: 850;
+      }
+
+      .hero p {
+        max-width: 850px;
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 10px 14px;
+        border: 1px solid var(--line-strong);
+        border-radius: 10px;
+        background: #fff;
+        font-weight: 800;
+      }
+
+      .btn.primary {
+        color: #fff;
+        background: var(--brand);
+        border-color: var(--brand);
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 18px;
+        align-items: start;
+        margin-top: 18px;
+      }
+
+      .main {
+        display: grid;
+        gap: 16px;
+      }
+
+      .side {
+        position: sticky;
+        top: 16px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: 0 2px 10px rgba(35, 21, 48, 0.04);
+      }
+
+      .card-head {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--line);
+        background: var(--soft);
+      }
+
+      .card-head h2 {
+        font-size: 22px;
+        line-height: 1.15;
+      }
+
+      .card-body {
+        display: grid;
+        gap: 12px;
+        padding: 18px 20px 20px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .metric {
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+      }
+
+      .metric strong {
+        display: block;
+        color: var(--brand);
+        font-size: 22px;
+      }
+
+      .metric span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .priority-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .review-item {
+        display: grid;
+        grid-template-columns: 76px minmax(0, 1fr);
+        gap: 14px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+      }
+
+      .priority {
+        display: inline-flex;
+        width: 56px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .p0 {
+        background: var(--danger);
+      }
+
+      .p1 {
+        background: var(--brand);
+      }
+
+      .p2 {
+        background: var(--amber);
+      }
+
+      .p3 {
+        background: var(--teal);
+      }
+
+      .review-item h3 {
+        margin-bottom: 6px;
+        font-size: 17px;
+      }
+
+      .review-item ul,
+      .compact-list {
+        margin: 8px 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+      }
+
+      .review-item li,
+      .compact-list li {
+        margin: 4px 0;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 5px 8px;
+        border-radius: 999px;
+        color: var(--brand);
+        background: var(--soft);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .tag.teal {
+        color: var(--teal);
+        background: rgba(36, 116, 110, 0.1);
+      }
+
+      .tag.amber {
+        color: var(--amber);
+        background: rgba(163, 101, 21, 0.1);
+      }
+
+      .tag.danger {
+        color: var(--danger);
+        background: rgba(150, 56, 75, 0.08);
+      }
+
+      .agenda {
+        display: grid;
+        gap: 8px;
+      }
+
+      .agenda-row {
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr);
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+      }
+
+      .agenda-row strong {
+        color: var(--brand);
+      }
+
+      .decision-table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+      }
+
+      .decision-table th,
+      .decision-table td {
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .decision-table th {
+        color: var(--brand);
+        background: var(--soft);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .decision-table tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .output-box {
+        min-height: 140px;
+        padding: 14px;
+        border: 1px dashed var(--line-strong);
+        border-radius: 10px;
+        background: #fbfafc;
+        color: var(--muted);
+      }
+
+      .callout {
+        padding: 14px;
+        border-left: 4px solid var(--amber);
+        border-radius: 10px;
+        background: rgba(163, 101, 21, 0.08);
+      }
+
+      @media (max-width: 980px) {
+        .workspace,
+        .grid.two,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .side {
+          position: static;
+        }
+      }
+
+      @media print {
+        body {
+          background: #fff;
+        }
+
+        .hero-actions,
+        .side {
+          display: none;
+        }
+
+        .app {
+          width: 100%;
+          padding: 0;
+        }
+
+        .hero,
+        .card,
+        .review-item {
+          box-shadow: none;
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">PR</div>
+          <div>
+            <strong>Purple Ruler</strong>
+            <div class="muted">Client enrolment prototype review</div>
+          </div>
+        </div>
+        <div class="muted">Briefing guide for staged review</div>
+      </header>
+
+      <section class="hero">
+        <div class="eyebrow">Team Briefing Pack</div>
+        <h1>Review the new product-led enrolment experience</h1>
+        <p>
+          Use this page to keep the review focused on the biggest commercial, operational,
+          and client-experience decisions. This is a briefing-first review: the team can review
+          the prototype this week, hear the walkthrough next week, and then lock the final direction.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="purpleruler-client-enrolment-prototype.html">Open prototype</a>
+          <a class="btn" href="purple-ruler-enrolment-requirements.md">Open requirements</a>
+          <a class="btn" href="wix-implementation-spec.md">Open Wix spec</a>
+        </div>
+      </section>
+
+      <div class="workspace">
+        <section class="main">
+          <section class="card">
+            <div class="card-head">
+              <h2>Review Outcome</h2>
+            </div>
+            <div class="card-body">
+              <div class="summary-grid">
+                <div class="metric">
+                  <strong>P0</strong>
+                  <span>Must decide</span>
+                </div>
+                <div class="metric">
+                  <strong>P1</strong>
+                  <span>High impact</span>
+                </div>
+                <div class="metric">
+                  <strong>P2</strong>
+                  <span>Improve next</span>
+                </div>
+                <div class="metric">
+                  <strong>P3</strong>
+                  <span>Polish later</span>
+                </div>
+              </div>
+              <p class="muted">
+                By the end of the session, the team should leave with one of three calls:
+                approve the direction, approve with changes, or reject a core assumption.
+              </p>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h2>Priority Review List</h2>
+            </div>
+            <div class="card-body priority-list">
+              <article class="review-item">
+                <div><span class="priority p0">P0</span></div>
+                <div>
+                  <h3>Commercial model is understandable before submission</h3>
+                  <p class="muted">
+                    The prototype must make pricing and commercial consequences visible before the client submits.
+                  </p>
+                  <ul>
+                    <li>Does the quote clearly show ex-VAT total, VAT @20%, and total inc. VAT?</li>
+                    <li>Does Cat B show the &pound;200 setup fee trigger and waiver logic clearly?</li>
+                    <li>Does Cat D show the 30% low-volume uplift clearly and not feel like a hidden penalty?</li>
+                    <li>Does custom timing outside :00 or :30 clearly trigger +20% on the affected group?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag danger">Decision required</span>
+                    <span class="tag amber">Pricing risk</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="review-item">
+                <div><span class="priority p0">P0</span></div>
+                <div>
+                  <h3>Payment and Accept Quote policy is commercially safe</h3>
+                  <p class="muted">
+                    The team needs to decide how much commitment is required before delivery preparation starts.
+                  </p>
+                  <ul>
+                    <li>For Academy, should card subscription/payment be the default and strongest path?</li>
+                    <li>For Blueprint, Compass, and Distinction, is Accept Quote enough before delivery preparation?</li>
+                    <li>Should UK schools be allowed PO to follow, or must quote acceptance happen before start?</li>
+                    <li>Should Local Authorities have a different approved PO/framework pathway?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag danger">Cash flow</span>
+                    <span class="tag teal">UK procurement</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="review-item">
+                <div><span class="priority p0">P0</span></div>
+                <div>
+                  <h3>Product boundaries prevent bad-fit requests</h3>
+                  <p class="muted">
+                    The enrolment flow should reduce complaints and delivery drag by pushing clients toward the right product.
+                  </p>
+                  <ul>
+                    <li>Can a school/LA immediately tell the difference between Academy, Blueprint, Compass, and Distinction?</li>
+                    <li>Is Distinction clearly outcome-focused tutoring, not unlimited bespoke schooling?</li>
+                    <li>Is Compass clearly SEND-informed tutoring, not therapy?</li>
+                    <li>Is Academy clearly standardised AP delivery, not a bespoke curriculum service?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag danger">Complaint prevention</span>
+                    <span class="tag">Product-led enrolment</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="review-item">
+                <div><span class="priority p1">P1</span></div>
+                <div>
+                  <h3>Schedule rules reduce teacher waste</h3>
+                  <p class="muted">
+                    The B/D group schedule UI should make stable delivery easier and costly complexity visible.
+                  </p>
+                  <ul>
+                    <li>Are :00 and :30 timings treated as standard and not charged extra?</li>
+                    <li>Is custom timing outside :00/:30 visibly priced as +20%?</li>
+                    <li>Should Week A / Week B alternating schedules be blocked, charged, or routed to manual review?</li>
+                    <li>Does the group model make teacher allocation more predictable?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag amber">Ops cost</span>
+                    <span class="tag teal">Teacher utilisation</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="review-item">
+                <div><span class="priority p1">P1</span></div>
+                <div>
+                  <h3>Client can complete the request without giant-form fatigue</h3>
+                  <p class="muted">
+                    The prototype must feel faster and clearer than the old Lark intake process.
+                  </p>
+                  <ul>
+                    <li>Can the client choose product, paste students, configure needs, and review quote without losing context?</li>
+                    <li>Are Add student and Add group actions obvious enough?</li>
+                    <li>Does the right-side quote help decision-making rather than distract?</li>
+                    <li>Does the review step let users fix mistakes quickly?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag teal">Client UX</span>
+                    <span class="tag">Friction reduction</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="review-item">
+                <div><span class="priority p1">P1</span></div>
+                <div>
+                  <h3>Add-ons feel like entitlements, not random extras</h3>
+                  <p class="muted">
+                    Add-ons should turn high-effort client behaviours into visible commercial choices.
+                  </p>
+                  <ul>
+                    <li>Are add-ons framed around client pain points, not internal operations?</li>
+                    <li>Do selected add-ons appear in quote sheet with price and remove action?</li>
+                    <li>Are pass-through exam centre fees clearly separate from Purple Ruler fees?</li>
+                    <li>Are the current add-on catalogues too broad, too narrow, or right for phase one?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag amber">Margin protection</span>
+                    <span class="tag teal">Expectation management</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="review-item">
+                <div><span class="priority p2">P2</span></div>
+                <div>
+                  <h3>Portal relationship after submission is credible</h3>
+                  <p class="muted">
+                    The submitted state should feel like the start of an ongoing service relationship, not the end of a form.
+                  </p>
+                  <ul>
+                    <li>Are the client-visible statuses simple enough: Submitted, In Review, Action Needed, Preparing Delivery, Live, Closed?</li>
+                    <li>Does the submitted page make portal follow-up obvious?</li>
+                    <li>What exactly should trigger Action Needed?</li>
+                    <li>Which email notifications are essential for phase one?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag">Portal</span>
+                    <span class="tag teal">Retention</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="review-item">
+                <div><span class="priority p2">P2</span></div>
+                <div>
+                  <h3>Data collected is complete enough for operations</h3>
+                  <p class="muted">
+                    The prototype should collect enough data at first submission to avoid back-and-forth.
+                  </p>
+                  <ul>
+                    <li>Are required student fields sufficient for onboarding?</li>
+                    <li>Does B/D group-level data support scheduling and teacher allocation?</li>
+                    <li>Are attachments such as EHCP and scheme of work missing from this prototype review?</li>
+                    <li>Can the JSON payload map cleanly into AnyCross/Lark?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag amber">Ops handover</span>
+                    <span class="tag">Data model</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="review-item">
+                <div><span class="priority p3">P3</span></div>
+                <div>
+                  <h3>Visual polish and Wix implementation details</h3>
+                  <p class="muted">
+                    These matter, but should not dominate the first commercial review.
+                  </p>
+                  <ul>
+                    <li>Does the page feel aligned with purpleruler.com?</li>
+                    <li>Are typography, spacing, and quote-sheet density appropriate for school/LA users?</li>
+                    <li>Which parts should be native Wix elements vs custom Velo/HTML components?</li>
+                    <li>What can be simplified for the first Wix Studio implementation?</li>
+                  </ul>
+                  <div class="tag-row">
+                    <span class="tag">Wix Studio</span>
+                    <span class="tag teal">Polish</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h2>Key Decisions To Capture</h2>
+            </div>
+            <div class="card-body">
+              <table class="decision-table">
+                <thead>
+                  <tr>
+                    <th>Decision</th>
+                    <th>Why it matters</th>
+                    <th>Recommended call</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Academy payment model</td>
+                    <td>Academy should be the low-friction, standardised provision engine.</td>
+                    <td>Prefer card payment/subscription before start.</td>
+                  </tr>
+                  <tr>
+                    <td>Accept Quote vs card for B/C/D</td>
+                    <td>UK schools and LAs often use procurement/PO workflows.</td>
+                    <td>Allow Accept Quote, but require quote acceptance before start.</td>
+                  </tr>
+                  <tr>
+                    <td>Week A / Week B schedule policy</td>
+                    <td>Alternating timetables can waste teacher capacity and create admin load.</td>
+                    <td>Discuss whether to block, price, or manual-review.</td>
+                  </tr>
+                  <tr>
+                    <td>Cat B setup fee</td>
+                    <td>Small bespoke courses are costly to set up and hard to scale.</td>
+                    <td>Keep &pound;200 if under 10 groups and under 200h.</td>
+                  </tr>
+                  <tr>
+                    <td>Cat D low-volume uplift</td>
+                    <td>Distinction needs stronger boundaries to reduce mismatch and complaints.</td>
+                    <td>Keep 30% uplift under 200h, capped at 200h equivalent.</td>
+                  </tr>
+                  <tr>
+                    <td>Custom timing uplift</td>
+                    <td>Non-standard minutes create teacher scheduling complexity.</td>
+                    <td>Keep :00/:30 standard; other minutes +20%.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h2>Suggested Meeting Output</h2>
+            </div>
+            <div class="card-body">
+              <div class="output-box">
+                <p><strong>Decision summary:</strong> Approve / approve with changes / reject core assumption.</p>
+                <p><strong>Commercial rule changes:</strong> ...</p>
+                <p><strong>UX changes for next prototype:</strong> ...</p>
+                <p><strong>Wix implementation implications:</strong> ...</p>
+                <p><strong>Owner and deadline:</strong> ...</p>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <aside class="side">
+          <section class="card">
+            <div class="card-head">
+              <h2>Review Cadence</h2>
+            </div>
+            <div class="card-body agenda">
+              <div class="agenda-row">
+                <strong>This week</strong>
+                <span>Team reviews the prototype and this priority list asynchronously. Capture comments, risks, and objections without trying to resolve everything immediately.</span>
+              </div>
+              <div class="agenda-row">
+                <strong>Next week</strong>
+                <span>Walk through the enrolment model, explain the commercial logic, and answer questions around pricing, payment, schedule rules, and Wix implementation.</span>
+              </div>
+              <div class="agenda-row">
+                <strong>Finalise</strong>
+                <span>Lock the agreed product boundaries, quote/payment model, surcharge rules, and next Wix build scope.</span>
+              </div>
+              <div class="agenda-row">
+                <strong>Mode</strong>
+                <span>Inform first, discuss second, decide third. This keeps the review from becoming a long live design-by-committee session.</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h2>Do Not Get Stuck On</h2>
+            </div>
+            <div class="card-body">
+              <ul class="compact-list">
+                <li>Pixel-perfect visual polish before commercial rules are approved.</li>
+                <li>Full production Stripe implementation details.</li>
+                <li>Every Lark field mapping during the first review.</li>
+                <li>US district/school edge cases; this prototype is UK school/LA first.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h2>Review Lens</h2>
+            </div>
+            <div class="card-body">
+              <div class="callout">
+                <p>
+                  The strongest version of this prototype should reduce admin load, protect teacher
+                  capacity, clarify client expectations, and preserve revenue even if Purple Ruler
+                  accepts fewer low-quality requests.
+                </p>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>
