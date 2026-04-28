@@ -1747,7 +1747,7 @@
         ],
         distinction: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
-          { id: "dist_diagnostic", name: "Monthly Diagnostic Deep-dive", price: 275, unit: "per student / subject / month" },
+          { id: "dist_diagnostic", name: "Monthly Diagnostic Deep-dive", price: 98, unit: "per student / subject / month" },
           { id: "dist_enhanced_marking", name: "Enhanced Marking with Written Action Plan", price: 140, unit: "per paper" },
           { id: "dist_exam_centre", name: "Exam Centre Placement Guarantee", price: 650, unit: "per student / exam series", passThrough: "Exam centre, access arrangement, invigilation, and late fees passed through separately" }
         ]
@@ -2457,7 +2457,7 @@
                     <input type="checkbox" data-addon-toggle="${addon.id}" data-student="${index}" ${student.addonIds?.includes(addon.id) ? "checked" : ""} />
                     <span class="addon-option-content">
                       <span class="option-pill ${getPillClass(addon, addonIndex)}">${addon.name}</span>
-                      <span class="addon-note">${addon.unit}${addon.passThrough ? " · pass-through fees separate" : ""}</span>
+                      <span class="addon-note">${formatMoney(addon.price)} ex-VAT · ${addon.unit}${addon.passThrough ? " · pass-through fees separate" : ""}</span>
                     </span>
                   </label>
                 `).join("")}
@@ -2596,7 +2596,7 @@
                         <input type="checkbox" data-group-addon="${addon.id}" data-group="${groupIndex}" ${group.addonIds.includes(addon.id) ? "checked" : ""} />
                         <span class="addon-option-content">
                           <span class="option-pill ${getPillClass(addon, addonIndex)}">${addon.name}</span>
-                          <span class="addon-note">${addon.unit}${addon.passThrough ? " · pass-through fees separate" : ""}</span>
+                          <span class="addon-note">${formatMoney(addon.price)} ex-VAT · ${addon.unit}${addon.passThrough ? " · pass-through fees separate" : ""}</span>
                         </span>
                       </label>
                     `).join("")}
