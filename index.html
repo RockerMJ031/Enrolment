@@ -1702,7 +1702,7 @@
           baseRate: 37.5,
           baseService: "Specialist tutoring informed by SEND, ESOL, learning gaps, and support intensity. It is not therapy.",
           included: ["Default 1:1 support model", "Minimum 8-week structure", "SEND-informed teaching approach", "Structured communication boundaries"],
-          additionalCharges: ["EHCP annual review written input is requested", "Monthly SEND-framed reporting is requested", "Parent communication or LA attendance data support is required"],
+          additionalCharges: ["EHCP annual review written input is requested", "SEND Badge + Human QA is requested", "Parent communication or LA attendance data support is required"],
           notSuitable: ["Therapy or clinical intervention", "Unbounded parent support", "Medical or diagnostic provision"],
           subCategories: [{ id: "compass", label: "Compass support", price: 37.5, unit: "hour" }]
         },
@@ -1741,9 +1741,9 @@
         compass: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
           { id: "compass_ehcp", name: "EHCP Annual Review Written Input", price: 650, unit: "per student / document" },
-          { id: "compass_send_report", name: "Monthly SEND-framed progress report", price: 220, unit: "per student / month" },
           { id: "compass_parent_communication", name: "Parent communication", price: 100, unit: "per student / month" },
-          { id: "compass_attendance_data", name: "Attendance Data Filling", price: 100, unit: "per student / month" }
+          { id: "compass_attendance_data", name: "Attendance Data Filling", price: 100, unit: "per student / month" },
+          { id: "compass_send_badge_qa", name: "SEND Badge + Human QA", price: 5, unit: "per hour uplift" }
         ],
         distinction: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
@@ -1986,6 +1986,8 @@
       function studentAddonQuantity(addon, student) {
         const weeks = Number(student.weeks || 0);
         const months = Math.max(1, Math.ceil(weeks / 4));
+        const hours = Number(student.hoursPerWeek || 0) * weeks;
+        if (addon.unit.includes("per hour")) return hours;
         if (addon.unit.includes("month")) return months;
         return 1;
       }
