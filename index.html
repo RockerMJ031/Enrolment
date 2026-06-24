@@ -414,6 +414,30 @@
         line-height: 1.25;
       }
 
+      .sales-banner {
+        margin: 0 0 18px;
+        padding: 12px 16px;
+        border: 1px solid var(--line-strong);
+        border-left: 4px solid var(--brand);
+        background: var(--soft);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-size: var(--fs-body);
+        line-height: 1.4;
+      }
+
+      .sales-banner strong {
+        color: var(--brand);
+      }
+
+      .sales-note {
+        display: inline-block;
+        margin-top: 7px;
+        color: var(--brand);
+        font-size: var(--fs-caption);
+        font-weight: 600;
+      }
+
       .tag {
         display: inline-flex;
         width: fit-content;
@@ -1491,6 +1515,9 @@
               <p class="muted step-intro">
                 Pick one product for this service request. Later steps only change student-level sub-category and add-ons.
               </p>
+              <div class="sales-banner">
+                <strong>Standard rates shown</strong> — contact Sales for volume or bespoke discounts.
+              </div>
               <div class="product-grid" id="productGrid"></div>
             </div>
 
@@ -1668,7 +1695,7 @@
           bestFor: ["UK schools needing a rapid AP start", "Local Authorities arranging suitable education quickly", "Students suited to a standard online provision route"],
           baseService: "A fast-start online Alternative Provision route for UK schools and Local Authorities that need suitable education arranged quickly. Standard delivery uses a 1:6 live group model; Purple Ruler allocates each student to the right Academy group.",
           included: ["48-hour onboarding target", "Minimum 4-week structure", "Standard 1:6 live group teaching model", "Attendance and onboarding visibility"],
-          additionalCharges: ["Monthly reporting or parent liaison is requested", "Exam centre placement support is required", "Client requests work beyond standard group allocation"],
+          additionalCharges: [],
           notSuitable: ["Bespoke curriculum design", "School timetable synchronisation", "Exclusive cohort requests"],
           subCategories: [
             { id: "core", label: "Core Subject", price: 139, unit: "week" },
@@ -1688,23 +1715,23 @@
           setupHourThreshold: 200,
           baseService: "Bespoke provision aligned to timetable, scheme of work, level data, and reintegration pathway.",
           included: ["Curriculum-aligned setup", "Scheme-of-work mapping", "Reintegration-oriented design", "Stakeholder coordination"],
-          additionalCharges: ["Fewer than 10 classes and fewer than 200 total hours", "Custom start/end times outside :00 or :30 are requested (+20%)", "Mock exam, reintegration, or regrouping review is requested", "Timetable changes are requested after setup"],
+          additionalCharges: ["Custom start/end times outside :00 or :30 are requested (+20%)", "Timetable changes are requested after setup"],
           notSuitable: ["Ad-hoc one-off tutoring", "No curriculum alignment need", "Very small requests avoiding setup"],
           subCategories: [{ id: "blueprint", label: "Blueprint provision", price: 29.17, unit: "hour" }]
         },
         compass: {
           name: "Cat C · Compass",
           subtitle: "SEND-informed specialist tutoring",
-          rateLabel: "£37.50/hour",
-          priceDisplay: "£37.50",
+          rateLabel: "£35/hour",
+          priceDisplay: "£35",
           priceUnit: "/ hour ex-VAT",
           bestFor: ["SEND-informed tutoring", "ESOL or learning gaps", "Specialist engagement support"],
-          baseRate: 37.5,
+          baseRate: 35,
           baseService: "Specialist tutoring informed by SEND, ESOL, learning gaps, and support intensity. It is not therapy.",
-          included: ["Default 1:1 support model", "Minimum 8-week structure", "SEND-informed teaching approach", "Structured communication boundaries"],
-          additionalCharges: ["EHCP annual review written input is requested", "SEND Badge + Human QA is requested", "Parent communication or LA attendance data support is required"],
+          included: ["Default 1:1 support model", "Minimum 8-week structure", "SEND-informed teaching approach", "Parent communication included", "Structured communication boundaries"],
+          additionalCharges: [],
           notSuitable: ["Therapy or clinical intervention", "Unbounded parent support", "Medical or diagnostic provision"],
-          subCategories: [{ id: "compass", label: "Compass support", price: 37.5, unit: "hour" }]
+          subCategories: [{ id: "compass", label: "Compass support", price: 35, unit: "hour" }]
         },
         distinction: {
           name: "Cat D · Distinction",
@@ -1719,7 +1746,7 @@
           upliftCapValue: 7500,
           baseService: "Targeted tutoring with explicit academic outcomes, bounded scope, and clear success criteria.",
           included: ["Outcome-led academic tutoring", "Subject-specific intervention", "Progress against defined academic goal", "Clear product boundary"],
-          additionalCharges: ["Total enrolment is below 200 hours", "Custom start/end times outside :00 or :30 are requested (+20%)", "Monthly diagnostic deep-dive is requested", "Exam centre placement support is required"],
+          additionalCharges: [],
           notSuitable: ["Unlimited bespoke schooling", "Unbounded academic support", "Broad timetable replacement"],
           subCategories: [{ id: "distinction", label: "Distinction tutoring", price: 37.5, unit: "hour" }]
         }
@@ -1728,28 +1755,22 @@
       const addonCatalog = {
         academy: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
-          { id: "academy_monthly_progress", name: "Monthly progress report", price: 60, unit: "per student / month" },
-          { id: "academy_parent_liaison", name: "Parent liaison", price: 150, unit: "per student / month" },
-          { id: "academy_exam_centre", name: "Exam Centre Placement Guarantee", price: 650, unit: "per student / exam series", passThrough: "Exam centre fees, entry fees, late fees, access arrangements, and invigilation passed through separately" }
+          { id: "academy_enrichment", name: "PSHE + PE + Career Guidance (3 lessons)", price: 35, unit: "per student / week" },
+          { id: "academy_electives", name: "2 Elective Lessons", price: 35, unit: "per student / week" },
+          { id: "academy_therapy", name: "Therapy (1 hour)", price: 45, unit: "per student / week" }
         ],
         blueprint: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
-          { id: "blueprint_mock_analysis", name: "Mock Exam + Analysis", price: 220, unit: "per student / subject / mock" },
-          { id: "blueprint_reintegration", name: "Reintegration Analysis", price: 100, unit: "per student / month" },
-          { id: "blueprint_regrouping", name: "Monthly Regrouping Review", price: 50, unit: "per student / month" }
+          { id: "blueprint_mentorship", name: "1:1 Mentorship (1 hour)", price: 35, unit: "per student / week" },
+          { id: "blueprint_therapy", name: "Therapy (1 hour)", price: 45, unit: "per student / week" }
         ],
         compass: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
-          { id: "compass_ehcp", name: "EHCP Annual Review Written Input", price: 650, unit: "per student / document" },
-          { id: "compass_parent_communication", name: "Parent communication", price: 100, unit: "per student / month" },
-          { id: "compass_attendance_data", name: "Attendance Data Filling", price: 100, unit: "per student / month" },
-          { id: "compass_send_badge_qa", name: "SEND Badge + Human QA", price: 5, unit: "per hour uplift" }
+          { id: "compass_mentorship", name: "1:1 Mentorship (1 hour)", price: 35, unit: "per student / week" },
+          { id: "compass_therapy", name: "Therapy (1 hour)", price: 45, unit: "per student / week" }
         ],
         distinction: [
-          { id: "none", name: "No add-on", price: 0, unit: "" },
-          { id: "dist_diagnostic", name: "Monthly Diagnostic Deep-dive", price: 98, unit: "per student / subject / month" },
-          { id: "dist_enhanced_marking", name: "Enhanced Marking with Written Action Plan", price: 140, unit: "per paper" },
-          { id: "dist_exam_centre", name: "Exam Centre Placement Guarantee", price: 650, unit: "per student / exam series", passThrough: "Exam centre, access arrangement, invigilation, and late fees passed through separately" }
+          { id: "none", name: "No add-on", price: 0, unit: "" }
         ]
       };
 
@@ -1790,7 +1811,7 @@
             endDate: "2026-06-20",
             weeks: 8,
             hoursPerWeek: 2,
-            addonIds: ["academy_monthly_progress", "academy_parent_liaison"]
+            addonIds: ["academy_enrichment", "academy_therapy"]
           },
           {
             id: "s2",
@@ -1827,7 +1848,7 @@
             expectedGrade: "Grade 5",
             startDate: "2026-04-25",
             endDate: "2026-06-20",
-            addonIds: ["blueprint_mock_analysis"]
+            addonIds: ["blueprint_mentorship"]
           }
         ]
       };
@@ -1988,6 +2009,7 @@
         const months = Math.max(1, Math.ceil(weeks / 4));
         const hours = Number(student.hoursPerWeek || 0) * weeks;
         if (addon.unit.includes("per hour")) return hours;
+        if (addon.unit.includes("week")) return weeks;
         if (addon.unit.includes("month")) return months;
         return 1;
       }
@@ -2099,6 +2121,8 @@
       function groupAddonQuantity(addon, group) {
         const studentCount = group.selectedStudentIds.length || 1;
         const months = Math.max(1, Math.ceil(dateWeeks(group.startDate, group.endDate) / 4));
+        const weeks = dateWeeks(group.startDate, group.endDate);
+        if (addon.unit.includes("per student") && addon.unit.includes("week")) return studentCount * weeks;
         if (addon.unit.includes("per student") && addon.unit.includes("month")) return studentCount * months;
         if (addon.unit.includes("per student")) return studentCount;
         if (addon.unit.includes("per cohort / month")) return months;
@@ -2299,6 +2323,7 @@
                 ${key === "compass" ? `<span class="tag teal" style="margin-top: 7px;">SEND-informed</span>` : ""}
                 ${key === "distinction" ? `<span class="tag amber" style="margin-top: 7px;">30% uplift &lt;200h</span>` : ""}
                 ${(key === "blueprint" || key === "distinction") ? `<span class="tag amber" style="margin-top: 7px;">+20% custom times</span>` : ""}
+                <span class="sales-note">Contact Sales for discounts</span>
               </div>
             </div>
             <p class="muted">${product.baseService}</p>
@@ -2311,18 +2336,22 @@
                 <div class="summary-label">Included</div>
                 <div class="summary-text">${includedList(product.included)}</div>
               </div>
+              ${(product.additionalCharges || []).length ? `
               <div class="summary-row amber">
                 <div class="summary-label">Additional charges may apply if</div>
                 <div class="summary-text">${chargeList(product.additionalCharges)}</div>
               </div>
+              ` : ""}
               <div class="summary-row danger">
                 <div class="summary-label">Not suitable</div>
                 <div class="summary-text danger">${boundaryList(product.notSuitable)}</div>
               </div>
+              ${(addonCatalog[key] || []).filter((a) => a.id !== "none").length ? `
               <div class="summary-row">
                 <div class="summary-label">Add-ons</div>
                 <div class="summary-text">${addonOptions(key)}</div>
               </div>
+              ` : ""}
             </div>
           </article>
         `).join("");
