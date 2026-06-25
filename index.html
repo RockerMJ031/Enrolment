@@ -4,7 +4,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Purple Ruler Client Enrolment Prototype</title>
+    <title>Purple Ruler — Client Enrolment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
       :root {
         --bg: #f7f5f8;
@@ -42,9 +45,12 @@
         margin: 0;
         color: var(--text);
         background: var(--bg);
-        font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        font-family: "Manrope", "Avenir Next", "Segoe UI", system-ui, sans-serif;
         font-size: var(--fs-body);
-        line-height: 1.45;
+        line-height: 1.5;
+        letter-spacing: -0.003em;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
       h1,
@@ -141,6 +147,14 @@
         grid-template-columns: minmax(0, 1fr) 360px;
         gap: 18px;
         align-items: start;
+      }
+
+      .workspace.hide-quote {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .workspace.hide-quote .quote {
+        display: none;
       }
 
       .panel {
@@ -325,7 +339,7 @@
       .product-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        gap: 20px;
       }
 
       .product-card,
@@ -340,8 +354,8 @@
 
       .product-card {
         display: grid;
-        gap: 14px;
-        padding: 20px;
+        gap: 18px;
+        padding: 28px;
         cursor: pointer;
         box-shadow: var(--shadow-sm);
         transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
@@ -368,7 +382,8 @@
         margin-top: 8px;
         font-size: var(--fs-h2);
         line-height: 1.22;
-        font-weight: 800;
+        font-weight: 700;
+        letter-spacing: -0.012em;
       }
 
       .price-block {
@@ -379,9 +394,10 @@
       .price-main {
         display: block;
         color: var(--brand);
-        font-size: 22px;
-        font-weight: 800;
-        line-height: 1.15;
+        font-size: 27px;
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
       }
 
       .price-stack {
@@ -442,27 +458,28 @@
         display: inline-flex;
         width: fit-content;
         align-items: center;
-        padding: 5px 8px;
+        padding: 4px 9px;
         border-radius: var(--radius);
         color: var(--brand);
         background: var(--soft);
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 600;
+        letter-spacing: 0.01em;
       }
 
       .tag.teal {
-        color: var(--teal);
-        background: rgba(36, 116, 110, 0.1);
+        color: #4a716c;
+        background: #eef3f2;
       }
 
       .tag.amber {
-        color: var(--amber);
-        background: rgba(163, 101, 21, 0.1);
+        color: #836a44;
+        background: #f4f0e9;
       }
 
       .tag.danger {
-        color: var(--danger);
-        background: rgba(150, 56, 75, 0.08);
+        color: #87616b;
+        background: #f5eff1;
       }
 
       .tag.muted {
@@ -475,22 +492,23 @@
         width: fit-content;
         max-width: 100%;
         align-items: center;
-        padding: 5px 9px;
+        padding: 6px 12px;
         border-radius: 999px;
-        color: #fff;
-        background: var(--brand);
+        color: var(--brand);
+        background: #f3eef9;
+        border: 1px solid #e6dcf1;
         font-size: 12px;
-        font-weight: 700;
+        font-weight: 600;
         line-height: 1.2;
       }
 
-      .option-pill.blue { background: #4f7ee8; }
-      .option-pill.teal { background: #087e8b; }
-      .option-pill.green { background: #13795b; }
-      .option-pill.amber { background: #d99000; }
-      .option-pill.red { background: #d94d4d; }
-      .option-pill.purple { background: var(--brand); }
-      .option-pill.muted { background: #697386; }
+      .option-pill.blue,
+      .option-pill.teal,
+      .option-pill.green,
+      .option-pill.amber,
+      .option-pill.red,
+      .option-pill.purple { background: #f3eef9; color: var(--brand); border-color: #e6dcf1; }
+      .option-pill.muted { background: #f3f1f6; color: var(--muted); border-color: var(--line); }
 
       .product-summary {
         display: grid;
@@ -501,8 +519,8 @@
       .summary-row {
         display: grid;
         grid-template-columns: 130px 1fr;
-        gap: 12px;
-        padding: 10px 0;
+        gap: 16px;
+        padding: 14px 0;
         border-bottom: 1px solid var(--line);
       }
 
@@ -573,9 +591,11 @@
       }
 
       .boundary-icon {
-        font-size: 12px;
+        font-size: 11px;
         line-height: 1.35;
         transform: translateY(1px);
+        filter: grayscale(0.3) saturate(0.7);
+        opacity: 0.8;
       }
 
       .included-list {
@@ -597,9 +617,11 @@
       }
 
       .included-icon {
-        font-size: 12px;
+        font-size: 11px;
         line-height: 1.35;
         transform: translateY(1px);
+        filter: grayscale(0.3) saturate(0.7);
+        opacity: 0.82;
       }
 
       .charge-list {
@@ -610,6 +632,39 @@
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
+      }
+
+      .addon-note-line {
+        color: var(--muted);
+        font-size: 11px;
+        margin-bottom: 8px;
+      }
+
+      .addon-priced {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 8px;
+      }
+
+      .addon-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .addon-row-name {
+        color: var(--text);
+      }
+
+      .addon-row-price {
+        color: var(--brand);
+        font-weight: 600;
+        white-space: nowrap;
       }
 
       .list {
@@ -1435,6 +1490,18 @@
         }
       }
 
+      @media (max-width: 560px) {
+        .summary-row {
+          grid-template-columns: 1fr;
+          gap: 6px;
+          padding: 12px 0;
+        }
+
+        .product-card {
+          padding: 20px;
+        }
+      }
+
       @media (max-width: 480px) {
         .student-fields {
           grid-template-columns: 1fr;
@@ -1488,7 +1555,7 @@
           <div class="brand-mark">PR</div>
           <div>
             <strong>Purple Ruler</strong>
-            <div class="muted">Client service request prototype</div>
+            <div class="muted">Client enrolment</div>
           </div>
         </div>
         <div class="muted">Signed in as Programme contact</div>
@@ -1498,10 +1565,10 @@
         <div class="panel">
           <div class="main-head">
             <div class="eyebrow">Client Enrolment</div>
-            <h1>Choose a product, paste students, then confirm their needs</h1>
+            <h1>Set up provision for your students</h1>
             <p>
-              The product is selected once for the request. Student rows then capture sub-category,
-              dates, schedule needs, optional multi-select add-ons, and the quote updates line by line.
+              Choose one product for this request, add the students it's for, and a clear quote
+              builds up as you go.
             </p>
           </div>
 
@@ -1513,10 +1580,10 @@
             <div class="step active" data-step="0">
               <h2>Step 1. Choose product</h2>
               <p class="muted step-intro">
-                Pick one product for this service request. Later steps only change student-level sub-category and add-ons.
+                Pick the product for this request. You'll set each student's details and add-ons in the next steps.
               </p>
               <div class="sales-banner">
-                <strong>Standard rates shown</strong> — contact Sales for volume or bespoke discounts.
+                Prices shown are standard rates. Become a <strong>Strategy Partner</strong> — a term or annual commitment — for locked-in, preferential pricing. Talk to our team.
               </div>
               <div class="product-grid" id="productGrid"></div>
             </div>
@@ -1524,13 +1591,13 @@
             <div class="step" data-step="1">
               <h2>Step 2. Student information</h2>
               <p class="muted step-intro">
-                Paste rows from Excel or Google Sheets, or edit directly in the table.
+                Paste your students from Excel or Google Sheets, or type them in directly.
               </p>
               <div class="paste-tools">
                 <div class="paste-head">
                   <div>
-                    <strong>Paste spreadsheet rows</strong>
-                    <p class="muted">Copy rows from Excel or Google Sheets, then paste them below.</p>
+                    <strong>Add your students</strong>
+                    <p class="muted">Copy your students from Excel or Google Sheets, then paste them below.</p>
                   </div>
                   <span class="tag teal">Tab or comma separated</span>
                 </div>
@@ -1544,11 +1611,11 @@
                   <span class="column-pill">7 Parent/carer phone</span>
                 </div>
                 <div class="field">
-                  <label for="pasteArea">Spreadsheet paste area</label>
+                  <label for="pasteArea">Student details</label>
                   <textarea id="pasteArea" placeholder="Amelia&#9;Turner&#9;amelia.turner@school.org&#9;Year 9&#9;Rebecca Turner&#9;rebecca.turner@example.com&#9;07123 456789&#10;Luca&#9;Evans&#9;luca.evans@school.org&#9;Year 9&#9;Daniel Evans&#9;daniel.evans@example.com&#9;07987 654321"></textarea>
                 </div>
                 <div class="button-row">
-                  <button class="btn secondary" type="button" id="parsePaste">Parse pasted rows</button>
+                  <button class="btn secondary" type="button" id="parsePaste">Add these students</button>
                   <button class="btn add-action" type="button" id="addStudent">+ Add student</button>
                   <button class="btn ghost" type="button" id="loadSample">Load sample rows</button>
                 </div>
@@ -1586,12 +1653,12 @@
             <div class="step" data-step="5">
               <h2>Submitted</h2>
               <p class="muted step-intro">
-                The service request has been saved to Wix CMS and sent to AnyCross as a complete JSON payload.
+                Your request has been saved and sent to our team to action.
               </p>
               <div class="submitted-hero">
                 <div>
                   <span class="status submitted">Submitted</span>
-                  <h3 style="margin-top: 12px;">Your service request has been received</h3>
+                  <h3 style="margin-top: 12px;">Your request has been received</h3>
                   <div class="reference">PR-REQ-20481</div>
                 </div>
                 <div class="status-timeline">
@@ -1609,11 +1676,11 @@
                   </div>
                   <div class="review-box">
                     <strong>Portal status is ready</strong>
-                    <p class="muted">The client can now view this request and any action needed in the portal.</p>
+                    <p class="muted">You can now view this request and any action needed in the portal.</p>
                   </div>
                   <div class="review-box">
                     <strong>Commercial confirmation</strong>
-                    <p class="muted">Stripe payment references or accepted quote reference <strong>PR-QTE-20481</strong> are stored against the request.</p>
+                    <p class="muted">Your payment or accepted quote reference <strong>PR-QTE-20481</strong> is saved with your request.</p>
                   </div>
                 </div>
                 <div class="button-row">
@@ -1658,11 +1725,11 @@
               <span>Total inc. VAT</span>
               <strong id="quoteIncTotal">£0</strong>
             </div>
-            <p class="muted" style="margin-top: 8px;">VAT is added at invoice. External exam centre fees and pass-through costs are charged separately.</p>
+            <p class="muted" style="margin-top: 8px;">VAT is added at invoice.</p>
           </div>
           <div class="quote-block">
             <strong>Payment / Accept Quote</strong>
-            <p class="muted" id="quotePayment">Stripe card payment selected</p>
+            <p class="muted" id="quotePayment">Card payment selected</p>
           </div>
         </div>
       </div>
@@ -1689,8 +1756,8 @@
         academy: {
           name: "Cat A · Academy",
           subtitle: "48-hour Alternative Provision Online School",
-          rateLabel: "Core £139/week, Full £169/week",
-          priceDisplay: "£139 Core · £169 Full",
+          rateLabel: "£159/week",
+          priceDisplay: "£159",
           priceUnit: "/ student / week ex-VAT",
           bestFor: ["UK schools needing a rapid AP start", "Local Authorities arranging suitable education quickly", "Students suited to a standard online provision route"],
           baseService: "A fast-start online Alternative Provision route for UK schools and Local Authorities that need suitable education arranged quickly. Standard delivery uses a 1:6 live group model; Purple Ruler allocates each student to the right Academy group.",
@@ -1698,26 +1765,25 @@
           additionalCharges: [],
           notSuitable: ["Bespoke curriculum design", "School timetable synchronisation", "Exclusive cohort requests"],
           subCategories: [
-            { id: "core", label: "Core Subject", price: 139, unit: "week" },
-            { id: "full", label: "Full Subject", price: 169, unit: "week" }
+            { id: "academy", label: "Academy place", price: 159, unit: "week" }
           ]
         },
         blueprint: {
           name: "Cat B · Blueprint",
           subtitle: "Curriculum-aligned bespoke provision",
-          rateLabel: "£29.17/hour",
-          priceDisplay: "£29.17",
+          rateLabel: "£35/hour",
+          priceDisplay: "£35",
           priceUnit: "/ hour ex-VAT",
           bestFor: ["Timetable-aligned provision", "Scheme-of-work continuity", "Reintegration pathway support"],
-          baseRate: 29.17,
+          baseRate: 35,
           setupFee: 200,
           setupClassThreshold: 10,
           setupHourThreshold: 200,
-          baseService: "Bespoke provision aligned to timetable, scheme of work, level data, and reintegration pathway.",
+          baseService: "Bespoke provision aligned to your timetable, scheme of work, pupil attainment data and reintegration pathway.",
           included: ["Curriculum-aligned setup", "Scheme-of-work mapping", "Reintegration-oriented design", "Stakeholder coordination"],
           additionalCharges: ["Custom start/end times outside :00 or :30 are requested (+20%)", "Timetable changes are requested after setup"],
           notSuitable: ["Ad-hoc one-off tutoring", "No curriculum alignment need", "Very small requests avoiding setup"],
-          subCategories: [{ id: "blueprint", label: "Blueprint provision", price: 29.17, unit: "hour" }]
+          subCategories: [{ id: "blueprint", label: "Blueprint provision", price: 35, unit: "hour" }]
         },
         compass: {
           name: "Cat C · Compass",
@@ -1727,7 +1793,7 @@
           priceUnit: "/ hour ex-VAT",
           bestFor: ["SEND-informed tutoring", "ESOL or learning gaps", "Specialist engagement support"],
           baseRate: 35,
-          baseService: "Specialist tutoring informed by SEND, ESOL, learning gaps, and support intensity. It is not therapy.",
+          baseService: "Specialist tutoring informed by SEND, ESOL and learning gaps, matched to the level of support needed. This is specialist teaching, not clinical therapy.",
           included: ["Default 1:1 support model", "Minimum 8-week structure", "SEND-informed teaching approach", "Parent communication included", "Structured communication boundaries"],
           additionalCharges: [],
           notSuitable: ["Therapy or clinical intervention", "Unbounded parent support", "Medical or diagnostic provision"],
@@ -1736,38 +1802,38 @@
         distinction: {
           name: "Cat D · Distinction",
           subtitle: "Outcome-focused academic tutoring",
-          rateLabel: "£37.50/hour",
-          priceDisplay: "£37.50",
+          rateLabel: "£45/hour",
+          priceDisplay: "£45",
           priceUnit: "/ hour ex-VAT",
           bestFor: ["Defined grade outcomes", "Subject intervention", "Retention-focused academic support"],
-          baseRate: 37.5,
+          baseRate: 45,
           thresholdHours: 200,
           upliftRate: 0.3,
           upliftCapValue: 7500,
-          baseService: "Targeted tutoring with explicit academic outcomes, bounded scope, and clear success criteria.",
+          baseService: "Targeted tutoring with explicit academic outcomes, a clear defined scope, and clear success criteria.",
           included: ["Outcome-led academic tutoring", "Subject-specific intervention", "Progress against defined academic goal", "Clear product boundary"],
           additionalCharges: [],
           notSuitable: ["Unlimited bespoke schooling", "Unbounded academic support", "Broad timetable replacement"],
-          subCategories: [{ id: "distinction", label: "Distinction tutoring", price: 37.5, unit: "hour" }]
+          subCategories: [{ id: "distinction", label: "Distinction tutoring", price: 45, unit: "hour" }]
         }
       };
 
       const addonCatalog = {
         academy: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
-          { id: "academy_enrichment", name: "PSHE + PE + Career Guidance (3 lessons)", price: 35, unit: "per student / week" },
-          { id: "academy_electives", name: "2 Elective Lessons", price: 35, unit: "per student / week" },
-          { id: "academy_therapy", name: "Therapy (1 hour)", price: 45, unit: "per student / week" }
+          { id: "academy_enrichment", name: "Enrichment: PSHE, PE & Careers (3 lessons/week)", price: 35, unit: "per student / week" },
+          { id: "academy_electives", name: "Elective Lessons (2/week)", price: 35, unit: "per student / week" },
+          { id: "academy_therapy", name: "Therapeutic Support (1 hr/week)", price: 45, unit: "per student / week" }
         ],
         blueprint: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
-          { id: "blueprint_mentorship", name: "1:1 Mentorship (1 hour)", price: 35, unit: "per student / week" },
-          { id: "blueprint_therapy", name: "Therapy (1 hour)", price: 45, unit: "per student / week" }
+          { id: "blueprint_mentorship", name: "1:1 Mentoring (1 hr/week)", price: 35, unit: "per student / week" },
+          { id: "blueprint_therapy", name: "Therapeutic Support (1 hr/week)", price: 45, unit: "per student / week" }
         ],
         compass: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
-          { id: "compass_mentorship", name: "1:1 Mentorship (1 hour)", price: 35, unit: "per student / week" },
-          { id: "compass_therapy", name: "Therapy (1 hour)", price: 45, unit: "per student / week" }
+          { id: "compass_mentorship", name: "1:1 Mentoring (1 hr/week)", price: 35, unit: "per student / week" },
+          { id: "compass_therapy", name: "Therapeutic Support (1 hr/week)", price: 45, unit: "per student / week" }
         ],
         distinction: [
           { id: "none", name: "No add-on", price: 0, unit: "" }
@@ -1776,9 +1842,9 @@
 
       const stepLabels = [
         ["Product", "Choose service"],
-        ["Students", "Paste table"],
-        ["Needs", "Confirm rows"],
-        ["Payment", "Stripe or quote"],
+        ["Students", "Add students"],
+        ["Needs", "Confirm details"],
+        ["Payment", "Pay or request quote"],
         ["Review", "Submit request"]
       ];
 
@@ -1800,7 +1866,7 @@
             parentName: "Rebecca Turner",
             parentEmail: "rebecca.turner@example.com",
             parentPhone: "07123 456789",
-            subCategory: "core",
+            subCategory: "academy",
             subject: "Maths",
             supportProfile: "Learning gaps",
             groupName: "GA",
@@ -1822,7 +1888,7 @@
             parentName: "Daniel Evans",
             parentEmail: "daniel.evans@example.com",
             parentPhone: "07987 654321",
-            subCategory: "full",
+            subCategory: "academy",
             subject: "English",
             supportProfile: "SEND-informed support",
             groupName: "GB",
@@ -2233,7 +2299,7 @@
       function paymentLabel() {
         const poNumber = document.getElementById("poNumber")?.value || "";
         const poToFollow = document.getElementById("poToFollow")?.checked || false;
-        if (state.paymentMethod === "stripe") return "Stripe card payment selected";
+        if (state.paymentMethod === "stripe") return "Card payment selected";
         if (poNumber) return `Quote accepted, PO ${poNumber}`;
         if (poToFollow) return "Quote accepted, PO to follow";
         return "Accept Quote selected, PO number optional";
@@ -2294,13 +2360,14 @@
         `;
         const addonOptions = (key) => {
           const addons = (addonCatalog[key] || []).filter((addon) => addon.id !== "none");
-          const visible = addons.slice(0, 4).map((addon, index) => `
-            <span class="option-pill ${getPillClass(addon, index)}">
-              ${addon.name}
-            </span>
+          if (!addons.length) return "";
+          const rows = addons.map((addon) => `
+            <li class="addon-row">
+              <span class="addon-row-name">${addon.name}</span>
+              <span class="addon-row-price">${formatCompactMoney(addon.price)}/week</span>
+            </li>
           `).join("");
-          const more = addons.length > 4 ? `<span class="option-pill muted">+${addons.length - 4} more</span>` : "";
-          return `<div class="addon-strip">${visible}${more}</div>`;
+          return `<div class="addon-note-line">Optional · per student</div><ul class="addon-priced">${rows}</ul>`;
         };
         refs.productGrid.innerHTML = Object.entries(products).map(([key, product]) => `
           <article class="product-card ${state.product === key ? "selected" : ""}" data-product="${key}" role="button" tabindex="0">
@@ -2310,12 +2377,7 @@
                 <h3>${product.subtitle}</h3>
               </div>
               <div class="price-block">
-                ${key === "academy" ? `
-                  <div class="price-stack">
-                    <div class="price-row">£139 <span>Core</span></div>
-                    <div class="price-row">£169 <span>Full</span></div>
-                  </div>
-                ` : `<span class="price-main">${product.priceDisplay}</span>`}
+                <span class="price-main">${product.priceDisplay}</span>
                 <span class="price-unit">${product.priceUnit}</span>
                 ${key === "academy" ? `<span class="tag teal" style="margin-top: 7px;">48h target</span>` : ""}
                 ${key === "blueprint" ? `<span class="tag teal" style="margin-top: 7px;">Best value</span>` : ""}
@@ -2323,7 +2385,7 @@
                 ${key === "compass" ? `<span class="tag teal" style="margin-top: 7px;">SEND-informed</span>` : ""}
                 ${key === "distinction" ? `<span class="tag amber" style="margin-top: 7px;">30% uplift &lt;200h</span>` : ""}
                 ${(key === "blueprint" || key === "distinction") ? `<span class="tag amber" style="margin-top: 7px;">+20% custom times</span>` : ""}
-                <span class="sales-note">Contact Sales for discounts</span>
+                <span class="sales-note">Strategy Partner pricing — talk to Sales</span>
               </div>
             </div>
             <p class="muted">${product.baseService}</p>
@@ -2338,12 +2400,12 @@
               </div>
               ${(product.additionalCharges || []).length ? `
               <div class="summary-row amber">
-                <div class="summary-label">Additional charges may apply if</div>
+                <div class="summary-label">Priced as standard — extra only if</div>
                 <div class="summary-text">${chargeList(product.additionalCharges)}</div>
               </div>
               ` : ""}
               <div class="summary-row danger">
-                <div class="summary-label">Not suitable</div>
+                <div class="summary-label">Consider another option for</div>
                 <div class="summary-text danger">${boundaryList(product.notSuitable)}</div>
               </div>
               ${(addonCatalog[key] || []).filter((a) => a.id !== "none").length ? `
@@ -2646,8 +2708,8 @@
 
       function renderPaymentOptions() {
         refs.paymentOptions.innerHTML = [
-          ["stripe", "▣", "Pay by card via Stripe", "Creates a secure Stripe Checkout path and stores the payment reference.", "Secure via Stripe"],
-          ["quote", "▤", "Accept Quote", "Accepts the quote and issues an invoice route for the finance team.", "Issue invoice"]
+          ["stripe", "▣", "Pay by card", "Pay securely by card — your payment is confirmed instantly.", "Secure payment"],
+          ["quote", "▤", "Accept quote", "Accept the quote and we'll issue an invoice to your finance team.", "Invoice"]
         ].map((option) => `
           <article class="payment-option ${state.paymentMethod === option[0] ? "selected" : ""}">
             <label>
@@ -2669,13 +2731,13 @@
         const totalInclVat = toMoneyValue(quote.total + vatAmount);
         if (state.paymentMethod === "stripe") {
           refs.paymentDetail.innerHTML = `
-            <span class="tag teal">Secure via Stripe</span>
+            <span class="tag teal">Secure payment</span>
             <h3 style="margin-top: 10px;">Amount to be charged</h3>
             <div class="quote-total" style="margin-top: 10px;">
               <span>Total inc. VAT</span>
               <strong>${formatMoney(totalInclVat)}</strong>
             </div>
-            <p class="muted" style="margin-top: 10px;">Includes ${formatMoney(vatAmount)} VAT. In production this launches Stripe Checkout Session.</p>
+            <p class="muted" style="margin-top: 10px;">Includes ${formatMoney(vatAmount)} VAT.</p>
           `;
           return;
         }
@@ -2847,6 +2909,9 @@
         document.querySelectorAll(".step").forEach((step) => {
           step.classList.toggle("active", Number(step.dataset.step) === state.step);
         });
+
+        const workspace = document.querySelector(".workspace");
+        if (workspace) workspace.classList.toggle("hide-quote", state.step === 0);
 
         document.getElementById("backBtn").classList.toggle("hide", state.step === 0 || state.step === 5);
         document.getElementById("saveBtn").classList.toggle("hide", state.step === 5);
