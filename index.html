@@ -1739,6 +1739,8 @@
       const yearGroups = ["Year 3", "Year 4", "Year 5", "Year 6", "Year 7", "Year 8", "Year 9", "Year 10", "Year 11", "Year 12", "Year 13"];
       const subjects = ["Maths", "English", "Science", "ESOL", "Humanities", "Full curriculum"];
       const supportProfiles = ["Standard", "Learning gaps", "SEND-informed support", "ESOL", "Reintegration"];
+      const sendOptions = ["EHCP", "SEN Support", "ASD", "ADHD", "SEMH", "SpLD / Dyslexia", "Speech & Language", "Sensory / Physical", "ESOL", "Other"];
+      const availabilityDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
       const groupOptions = ["GA", "GB", "GC", "GD", "GE", "GF", "1:1"];
       const teachingDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
       const pillClasses = ["blue", "teal", "amber", "purple", "green"];
@@ -1852,6 +1854,7 @@
         step: 0,
         product: "academy",
         paymentMethod: "stripe",
+        finance: { name: "", email: "", phone: "", department: "" },
         studentIdCounter: 3,
         collapsedStudents: {},
         collapsedNeeds: {},
@@ -2071,7 +2074,7 @@
       }
 
       function studentAddonQuantity(addon, student) {
-        const weeks = Number(student.weeks || 0);
+        const weeks = studentWeeks(student);
         const months = Math.max(1, Math.ceil(weeks / 4));
         const hours = Number(student.hoursPerWeek || 0) * weeks;
         if (addon.unit.includes("per hour")) return hours;
@@ -2131,6 +2134,14 @@
           endDate: student.endDate || "2026-06-20",
           weeks: Number(student.weeks || 8),
           hoursPerWeek: Number(student.hoursPerWeek || 2),
+          sendNeeds: Array.isArray(student.sendNeeds) ? student.sendNeeds : [],
+          brief: student.brief || "",
+          ehcpFileName: student.ehcpFileName || "",
+          availFlexible: student.availFlexible !== false,
+          availDays: Array.isArray(student.availDays) ? student.availDays : [],
+          availFrom: student.availFrom || "",
+          availTo: student.availTo || "",
+          availNote: student.availNote || "",
           addonIds: Array.isArray(student.addonIds)
             ? student.addonIds.filter((id) => id && id !== "none")
             : student.addonId && student.addonId !== "none"
@@ -2147,14 +2158,14 @@
         let baseLabel = "";
 
         if (state.product === "academy") {
-          base = toMoneyValue(sub.price * Number(student.weeks || 0));
-          baseLabel = `${sub.label}, ${student.weeks} weeks x ${formatMoney(sub.price)}/week`;
+          base = toMoneyValue(sub.price * studentWeeks(student));
+          baseLabel = `${sub.label}, ${studentWeeks(student)} weeks x ${formatMoney(sub.price)}/week`;
         } else if (state.product === "blueprint" || state.product === "distinction") {
-          const hours = Number(student.hoursPerWeek || 0) * Number(student.weeks || 0);
+          const hours = Number(student.hoursPerWeek || 0) * studentWeeks(student);
           base = toMoneyValue(hours * sub.price);
           baseLabel = `${hours} hours x ${formatMoney(sub.price)}/hour`;
         } else {
-          const hours = Number(student.hoursPerWeek || 0) * Number(student.weeks || 0);
+          const hours = Number(student.hoursPerWeek || 0) * studentWeeks(student);
           base = toMoneyValue(hours * sub.price);
           baseLabel = `${hours} hours x ${formatMoney(sub.price)}/hour`;
         }
@@ -2182,6 +2193,10 @@
         if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return 1;
         const days = Math.floor((end - start) / 86400000) + 1;
         return Math.max(1, Math.ceil(days / 7));
+      }
+
+      function studentWeeks(student) {
+        return dateWeeks(student.startDate, student.endDate);
       }
 
       function groupAddonQuantity(addon, group) {
@@ -2276,7 +2291,7 @@
         const lines = state.students.map(calculateStudent);
         const total = toMoneyValue(lines.reduce((sum, line) => sum + line.total, 0));
         const distinctionHours = state.product === "distinction"
-          ? state.students.reduce((sum, student) => sum + Number(student.hoursPerWeek || 0) * Number(student.weeks || 0), 0)
+          ? state.students.reduce((sum, student) => sum + Number(student.hoursPerWeek || 0) * studentWeeks(student), 0)
           : 0;
         const lowVolumeUplift = state.product === "distinction" && distinctionHours > 0 && distinctionHours < products.distinction.thresholdHours
           ? toMoneyValue(total * products.distinction.upliftRate)
@@ -2425,6 +2440,7 @@
             <button class="btn add-action" type="button" data-add-student-action>+ Add student</button>
             <button class="btn ghost" type="button" data-collapse-students="all">Collapse all</button>
             <button class="btn ghost" type="button" data-expand-students="all">Expand all</button>
+            <button class="btn remove" type="button" data-remove-all-students>Remove all</button>
           </div>
           ${state.students.map((student, index) => `
           <article class="student-card ${state.collapsedStudents[student.id] ? "collapsed" : ""}">
@@ -2530,16 +2546,59 @@
                 <input type="date" value="${student.endDate}" data-student="${index}" data-field="endDate" />
               </div>
               <div class="field">
-                <label>Weeks</label>
-                <select data-student="${index}" data-field="weeks">
-                  ${[4, 6, 8, 12, 16].map((weeks) => `<option value="${weeks}" ${Number(student.weeks) === weeks ? "selected" : ""}>${weeks}</option>`).join("")}
-                </select>
+                <label>Duration</label>
+                <div style="padding: 9px 0; font-weight: 600;">${studentWeeks(student)} weeks <span class="muted">(from dates)</span></div>
               </div>
+              ${state.product === "compass" ? `
               <div class="field">
                 <label>Hours / week</label>
-                <select data-student="${index}" data-field="hoursPerWeek" ${state.product === "academy" ? "disabled" : ""}>
+                <select data-student="${index}" data-field="hoursPerWeek">
                   ${[1, 2, 3, 4, 5, 6].map((hours) => `<option value="${hours}" ${Number(student.hoursPerWeek) === hours ? "selected" : ""}>${hours}</option>`).join("")}
                 </select>
+              </div>` : ""}
+            </div>
+            <div class="needs-extra" style="display: grid; gap: 14px; margin-top: 14px;">
+              <div class="field field-wide">
+                <label>SEND needs (optional, multi-select)</label>
+                <div class="addon-option-grid">
+                  ${sendOptions.map((opt) => `
+                    <label class="addon-check">
+                      <input type="checkbox" data-send-toggle="${opt}" data-student="${index}" ${(student.sendNeeds || []).includes(opt) ? "checked" : ""} />
+                      <span class="addon-option-content"><strong>${opt}</strong></span>
+                    </label>`).join("")}
+                </div>
+              </div>
+              ${state.product === "compass" ? `
+              <div class="field field-wide">
+                <label>Preferred session times (optional · 1:1 scheduling)</label>
+                <label class="inline-check" style="margin: 4px 0 8px;">
+                  <input type="checkbox" data-avail-flexible data-student="${index}" ${student.availFlexible !== false ? "checked" : ""} />
+                  <span><strong>Flexible</strong> <span class="muted">any time works — we'll propose slots</span></span>
+                </label>
+                ${student.availFlexible === false ? `
+                <div style="display: grid; gap: 12px;">
+                  <div class="addon-option-grid">
+                    ${availabilityDays.map((day) => `
+                      <label class="addon-check">
+                        <input type="checkbox" data-avail-day="${day}" data-student="${index}" ${(student.availDays || []).includes(day) ? "checked" : ""} />
+                        <span class="addon-option-content"><strong>${day}</strong></span>
+                      </label>`).join("")}
+                  </div>
+                  <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div class="field"><label>Earliest</label><input type="time" data-student="${index}" data-field="availFrom" value="${student.availFrom || ""}" /></div>
+                    <div class="field"><label>Latest</label><input type="time" data-student="${index}" data-field="availTo" value="${student.availTo || ""}" /></div>
+                  </div>
+                  <div class="field"><label>Timing notes</label><input data-student="${index}" data-field="availNote" value="${student.availNote || ""}" placeholder="e.g. avoid Monday mornings" /></div>
+                </div>` : ""}
+              </div>` : ""}
+              <div class="field field-wide">
+                <label>EHCP / supporting document (optional)</label>
+                <input type="file" data-ehcp data-student="${index}" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" />
+                <span class="muted">${student.ehcpFileName ? `Selected: ${student.ehcpFileName} · stored on submit` : "Uploaded to Purple Ruler on submit (handled by backend in Wix)."}</span>
+              </div>
+              <div class="field field-wide">
+                <label>Student brief for teachers (optional)</label>
+                <textarea data-student="${index}" data-field="brief" placeholder="What you'd like the teaching team to know — context, goals, sensitivities.">${student.brief || ""}</textarea>
               </div>
             </div>
             <div class="addon-options">
@@ -2742,10 +2801,17 @@
           return;
         }
 
+        const fin = state.finance || {};
         refs.paymentDetail.innerHTML = `
           <span class="tag teal">School / LA finance</span>
-          <h3 style="margin-top: 10px;">Accept Quote</h3>
-          <p class="muted" style="margin-top: 8px;">Quote reference will be generated on submit. Accepting the quote allows Preparing Delivery while finance issues the invoice.</p>
+          <h3 style="margin-top: 10px;">Accept Quote → raise PO</h3>
+          <p class="muted" style="margin-top: 8px;">We'll email your finance contact to raise the PO. Enrolment completes once they confirm. (Email + confirmation are handled by Purple Ruler on submit.)</p>
+          <div class="needs-fields" style="margin-top: 12px;">
+            <div class="field"><label for="financeName">Finance contact name</label><input id="financeName" data-finance="name" value="${fin.name || ""}" placeholder="e.g. Sarah Hughes" /></div>
+            <div class="field"><label for="financeEmail">Finance email</label><input id="financeEmail" data-finance="email" value="${fin.email || ""}" placeholder="finance@school.org" /></div>
+            <div class="field"><label for="financePhone">Finance phone</label><input id="financePhone" data-finance="phone" value="${fin.phone || ""}" placeholder="01234 567890" /></div>
+            <div class="field"><label for="financeDept">Department</label><input id="financeDept" data-finance="department" value="${fin.department || ""}" placeholder="e.g. Finance / Business" /></div>
+          </div>
           <div class="field" style="margin-top: 12px;">
             <label for="poNumber">PO number (optional)</label>
             <input id="poNumber" placeholder="Enter PO number if available" />
@@ -2862,7 +2928,7 @@
         const totalInclVat = toMoneyValue(quote.total + vatAmount);
         const needLines = quote.mode === "group"
           ? quote.groupLines.map((line) => `<li>${line.group.groupName} - ${line.group.subject} - ${scheduleSummary(line.group)} - ${line.group.currentGrade} to ${line.group.expectedGrade} - students: ${line.group.selectedStudentIds.map(studentName).join(", ") || "None selected"}${line.scheduleUplift ? " - custom timing uplift applied" : ""}</li>`).join("")
-          : quote.lines.map((line) => `<li>${line.student.firstName} ${line.student.surname} - ${line.sub.label} - ${line.student.subject} - ${line.student.weeks} weeks - ${line.addons.length ? line.addons.map((addon) => addon.name).join(", ") : "No add-ons"}</li>`).join("");
+          : quote.lines.map((line) => `<li>${line.student.firstName} ${line.student.surname} - ${line.sub.label} - ${line.student.subject} - ${studentWeeks(line.student)} weeks - ${line.addons.length ? line.addons.map((addon) => addon.name).join(", ") : "No add-ons"}</li>`).join("");
         const quoteLines = quote.mode === "group"
           ? quote.groupLines.map((line) => `<li>${line.group.groupName}: ${formatMoney(line.total)}${line.scheduleUplift ? ` (includes ${formatMoney(line.scheduleUplift)} custom timing uplift)` : ""}</li>`).join("")
           : quote.lines.map((line) => `<li>${line.student.firstName} ${line.student.surname}: ${formatMoney(line.total)}</li>`).join("");
@@ -3056,6 +3122,18 @@
           return;
         }
 
+        if (event.target.closest("[data-remove-all-students]")) {
+          if (state.students.length && window.confirm("Remove all students from this request?")) {
+            state.students = [];
+            state.collapsedStudents = {};
+            state.collapsedNeeds = {};
+            renderStep();
+            renderQuote();
+            saveDraft();
+          }
+          return;
+        }
+
         const toggleNeedsCard = event.target.dataset.toggleNeedsCard;
         if (toggleNeedsCard) {
           state.collapsedNeeds[toggleNeedsCard] = !state.collapsedNeeds[toggleNeedsCard];
@@ -3155,6 +3233,13 @@
       });
 
       document.addEventListener("input", (event) => {
+        const financeField = event.target.dataset.finance;
+        if (financeField) {
+          if (!state.finance) state.finance = { name: "", email: "", phone: "", department: "" };
+          state.finance[financeField] = event.target.value;
+          saveDraft();
+          return;
+        }
         if (event.target.id === "poNumber" || event.target.id === "billingNotes") {
           renderQuote();
           saveDraft();
@@ -3247,6 +3332,41 @@
             student.addonIds = student.addonIds.filter((id) => id !== addonToggle);
           }
           renderQuote();
+          saveDraft();
+          return;
+        }
+
+        const sendToggle = event.target.dataset.sendToggle;
+        if (index !== undefined && sendToggle) {
+          const student = state.students[Number(index)];
+          if (!Array.isArray(student.sendNeeds)) student.sendNeeds = [];
+          if (event.target.checked && !student.sendNeeds.includes(sendToggle)) student.sendNeeds.push(sendToggle);
+          if (!event.target.checked) student.sendNeeds = student.sendNeeds.filter((item) => item !== sendToggle);
+          saveDraft();
+          return;
+        }
+
+        const availDay = event.target.dataset.availDay;
+        if (index !== undefined && availDay) {
+          const student = state.students[Number(index)];
+          if (!Array.isArray(student.availDays)) student.availDays = [];
+          if (event.target.checked && !student.availDays.includes(availDay)) student.availDays.push(availDay);
+          if (!event.target.checked) student.availDays = student.availDays.filter((item) => item !== availDay);
+          saveDraft();
+          return;
+        }
+
+        if (index !== undefined && event.target.dataset.availFlexible !== undefined) {
+          state.students[Number(index)].availFlexible = event.target.checked;
+          renderNeedsRows();
+          saveDraft();
+          return;
+        }
+
+        if (index !== undefined && event.target.dataset.ehcp !== undefined) {
+          const file = event.target.files && event.target.files[0];
+          state.students[Number(index)].ehcpFileName = file ? file.name : "";
+          renderNeedsRows();
           saveDraft();
           return;
         }
