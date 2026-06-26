@@ -1587,8 +1587,8 @@
               <div class="product-grid" id="productGrid"></div>
             </div>
 
-            <div class="step" data-step="1">
-              <h2>Step 2. Student information</h2>
+            <div class="step" data-step="1" id="stepStudents">
+              <h2 id="studentsHeading">Step 2. Student information</h2>
               <p class="muted step-intro">
                 Paste your students from Excel or Google Sheets, or type them in directly.
               </p>
@@ -1622,8 +1622,8 @@
               <div class="student-card-list" id="studentRows"></div>
             </div>
 
-            <div class="step" data-step="2">
-              <h2>Step 3. Student / group needs confirmation</h2>
+            <div class="step" data-step="2" id="stepNeeds">
+              <h2 id="needsHeading">Step 3. Student / group needs confirmation</h2>
               <p class="muted step-intro">
                 Academy confirms student-level Core/Full needs. Blueprint and Distinction use group needs for subject, schedule, selected students and grade target.
               </p>
@@ -2319,8 +2319,24 @@
         return "Accept Quote selected, PO number optional";
       }
 
+      function applyStepOrder() {
+        const stepStudents = document.getElementById("stepStudents");
+        const stepNeeds = document.getElementById("stepNeeds");
+        if (!stepStudents || !stepNeeds) return;
+        const group = isGroupProduct();
+        stepNeeds.dataset.step = group ? "1" : "2";        // group: Build groups at step 2 (index 1)
+        stepStudents.dataset.step = group ? "2" : "1";     // group: Students at step 3 (index 2, optional)
+        const nh = document.getElementById("needsHeading");
+        const sh = document.getElementById("studentsHeading");
+        if (nh) nh.textContent = group ? "Step 2. Build your groups" : "Step 3. Student / group needs confirmation";
+        if (sh) sh.textContent = group ? "Step 3. Students (optional)" : "Step 2. Student information";
+      }
+
       function renderProgress() {
-        refs.progressRow.innerHTML = stepLabels.map((label, index) => {
+        const labels = isGroupProduct()
+          ? [["Product", "Choose service"], ["Build groups", "Group setup"], ["Students", "Optional"], ["Payment", "Pay or request quote"], ["Review", "Submit request"]]
+          : stepLabels;
+        refs.progressRow.innerHTML = labels.map((label, index) => {
           let cls = "";
           if (index < state.step) cls = "done";
           if (index === state.step) cls = "active";
@@ -2436,9 +2452,8 @@
       function renderStudentRows() {
         refs.studentRows.innerHTML = `
           ${isGroupProduct() ? `
-          <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: #f6f2fc; border: 1px solid #e6dcf1; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;">
-            <span><strong>Group provision</strong> <span class="muted">— you don't need students yet. Build your groups first, then add students and assign them.</span></span>
-            <button class="btn add-action" type="button" data-jump-step="2">Build groups first →</button>
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #f6f2fc; border: 1px solid #e6dcf1; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;">
+            <span><strong>Optional</strong> <span class="muted">— students aren't required to quote group provision. Add them now, or skip with <strong>Continue</strong> and add them later (you can also add them inside each group).</span></span>
           </div>` : ""}
           <div class="button-row" style="margin-bottom: 4px;">
             <button class="btn add-action" type="button" data-add-student-action>+ Add student</button>
@@ -2978,6 +2993,7 @@
       }
 
       function renderStep() {
+        applyStepOrder();
         document.querySelectorAll(".step").forEach((step) => {
           step.classList.toggle("active", Number(step.dataset.step) === state.step);
         });
@@ -3001,8 +3017,8 @@
 
         renderProgress();
         if (state.step === 0) renderProducts();
-        if (state.step === 1) renderStudentRows();
-        if (state.step === 2) renderNeedsRows();
+        if (state.step === 1) { if (isGroupProduct()) renderNeedsRows(); else renderStudentRows(); }
+        if (state.step === 2) { if (isGroupProduct()) renderStudentRows(); else renderNeedsRows(); }
         if (state.step === 3) {
           renderPaymentOptions();
           renderPaymentDetail();
@@ -3013,6 +3029,7 @@
 
       function renderAll() {
         renderProducts();
+        applyStepOrder();
         renderStudentRows();
         renderNeedsRows();
         renderPaymentOptions();
