@@ -2435,6 +2435,11 @@
 
       function renderStudentRows() {
         refs.studentRows.innerHTML = `
+          ${isGroupProduct() ? `
+          <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: #f6f2fc; border: 1px solid #e6dcf1; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;">
+            <span><strong>Group provision</strong> <span class="muted">— you don't need students yet. Build your groups first, then add students and assign them.</span></span>
+            <button class="btn add-action" type="button" data-jump-step="2">Build groups first →</button>
+          </div>` : ""}
           <div class="button-row" style="margin-bottom: 4px;">
             <button class="btn add-action" type="button" data-add-student-action>+ Add student</button>
             <button class="btn ghost" type="button" data-collapse-students="all">Collapse all</button>
@@ -2730,6 +2735,7 @@
                 </div>
                 <div class="group-section">
                   <h4>Students in this group</h4>
+                  ${state.students.length ? `
                   <div class="student-chip-grid">
                     ${state.students.map((student) => `
                       <label class="student-chip">
@@ -2737,7 +2743,8 @@
                         ${student.firstName || "Student"} ${student.surname || ""}
                       </label>
                     `).join("")}
-                  </div>
+                  </div>` : `<p class="muted" style="margin: 0;">No students yet — add them now, or leave as TBC and add later. The quote is based on the group schedule, not student count.</p>`}
+                  <button class="btn ghost" type="button" data-add-student-to-group="${groupIndex}" style="margin-top: 10px;">+ Add student to this group</button>
                 </div>
                 <div class="group-section">
                   <h4>Add-ons, optional multi-select</h4>
@@ -3174,6 +3181,23 @@
           if (isGroupProduct() && state.groups[0]) {
             state.groups[0].selectedStudentIds.push(student.id);
             state.collapsedGroups[state.groups[0].id] = false;
+          }
+          renderAll();
+          saveDraft();
+          return;
+        }
+
+        const addToGroup = event.target.closest("[data-add-student-to-group]");
+        if (addToGroup) {
+          const gi = Number(addToGroup.dataset.addStudentToGroup);
+          const student = normaliseStudent();
+          state.students.push(student);
+          state.collapsedStudents[student.id] = false;
+          state.collapsedNeeds[student.id] = false;
+          if (state.groups[gi]) {
+            if (!Array.isArray(state.groups[gi].selectedStudentIds)) state.groups[gi].selectedStudentIds = [];
+            state.groups[gi].selectedStudentIds.push(student.id);
+            state.collapsedGroups[state.groups[gi].id] = false;
           }
           renderAll();
           saveDraft();
