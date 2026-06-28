@@ -1589,7 +1589,7 @@
 
             <div class="step" data-step="1" id="stepStudents">
               <h2 id="studentsHeading">Step 2. Student information</h2>
-              <p class="muted step-intro">
+              <p class="muted step-intro" id="studentsIntro">
                 Paste your students from Excel or Google Sheets, or type them in directly.
               </p>
               <div class="paste-tools">
@@ -1624,7 +1624,7 @@
 
             <div class="step" data-step="2" id="stepNeeds">
               <h2 id="needsHeading">Step 3. Student / group needs confirmation</h2>
-              <p class="muted step-intro">
+              <p class="muted step-intro" id="needsIntro">
                 Academy confirms student-level Core/Full needs. Blueprint and Distinction use group needs for subject, schedule, selected students and grade target.
               </p>
               <div class="needs-card-list" id="needsRows"></div>
@@ -1854,6 +1854,7 @@
         product: "academy",
         paymentMethod: "stripe",
         finance: { name: "", email: "", phone: "", department: "" },
+        defaults: { subCategory: "", subject: "Maths", supportProfile: "Standard", startDate: "2026-04-25", endDate: "2026-06-20", hoursPerWeek: 2 },
         studentIdCounter: 3,
         collapsedStudents: {},
         collapsedNeeds: {},
@@ -2122,17 +2123,17 @@
           parentName: student.parentName || "",
           parentEmail: student.parentEmail || "",
           parentPhone: student.parentPhone || "",
-          subCategory: student.subCategory || defaultSubCategory(),
-          subject: student.subject || "Maths",
-          supportProfile: student.supportProfile || "Standard",
+          subCategory: student.subCategory || (state.defaults && state.defaults.subCategory) || defaultSubCategory(),
+          subject: student.subject || (state.defaults && state.defaults.subject) || "Maths",
+          supportProfile: student.supportProfile || (state.defaults && state.defaults.supportProfile) || "Standard",
           groupName: student.groupName || "GA",
           groupTime: student.groupTime || "09:00-10:00",
           currentGrade: student.currentGrade || "Working towards",
           expectedGrade: student.expectedGrade || "Expected",
-          startDate: student.startDate || "2026-04-25",
-          endDate: student.endDate || "2026-06-20",
+          startDate: student.startDate || (state.defaults && state.defaults.startDate) || "2026-04-25",
+          endDate: student.endDate || (state.defaults && state.defaults.endDate) || "2026-06-20",
           weeks: Number(student.weeks || 8),
-          hoursPerWeek: Number(student.hoursPerWeek || 2),
+          hoursPerWeek: Number(student.hoursPerWeek || (state.defaults && state.defaults.hoursPerWeek) || 2),
           sendNeeds: Array.isArray(student.sendNeeds) ? student.sendNeeds : [],
           brief: student.brief || "",
           ehcpFileName: student.ehcpFileName || "",
@@ -2324,18 +2325,27 @@
         const stepNeeds = document.getElementById("stepNeeds");
         if (!stepStudents || !stepNeeds) return;
         const group = isGroupProduct();
-        stepNeeds.dataset.step = group ? "1" : "2";        // group: Build groups at step 2 (index 1)
-        stepStudents.dataset.step = group ? "2" : "1";     // group: Students at step 3 (index 2, optional)
+        // 统一：Step 2 = 配置(B/D 建组 / A/C 默认设置)放 #stepNeeds；Step 3 = 学生放 #stepStudents
+        stepNeeds.dataset.step = "1";
+        stepStudents.dataset.step = "2";
         const nh = document.getElementById("needsHeading");
         const sh = document.getElementById("studentsHeading");
-        if (nh) nh.textContent = group ? "Step 2. Build your groups" : "Step 3. Student / group needs confirmation";
-        if (sh) sh.textContent = group ? "Step 3. Students (optional)" : "Step 2. Student information";
+        if (nh) nh.textContent = group ? "Step 2. Build your groups" : "Step 2. Provision setup";
+        if (sh) sh.textContent = group ? "Step 3. Students (optional)" : "Step 3. Students";
+        const ni = document.getElementById("needsIntro");
+        const si = document.getElementById("studentsIntro");
+        if (ni) ni.textContent = group
+          ? "Create groups by subject, schedule, selected students and grade target. Pricing is based on the schedule, so you can build and quote groups before adding students."
+          : "Set the common provision details once. Every student you add next inherits these — you can override per student.";
+        if (si) si.textContent = group
+          ? "Add students and tick them into groups. Optional — you can skip with Continue and add them later."
+          : "Add students — each starts from your setup defaults. Adjust SEND, documents and per-student details here.";
       }
 
       function renderProgress() {
         const labels = isGroupProduct()
           ? [["Product", "Choose service"], ["Build groups", "Group setup"], ["Students", "Optional"], ["Payment", "Pay or request quote"], ["Review", "Submit request"]]
-          : stepLabels;
+          : [["Product", "Choose service"], ["Setup", "Provision defaults"], ["Students", "Add & adjust"], ["Payment", "Pay or request quote"], ["Review", "Submit request"]];
         refs.progressRow.innerHTML = labels.map((label, index) => {
           let cls = "";
           if (index < state.step) cls = "done";
@@ -2450,11 +2460,17 @@
       }
 
       function renderStudentRows() {
+        const group = isGroupProduct();
+        const product = getProduct();
+        const addons = group ? [] : getAddons();
         refs.studentRows.innerHTML = `
-          ${isGroupProduct() ? `
+          ${group ? `
           <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #f6f2fc; border: 1px solid #e6dcf1; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;">
             <span><strong>Optional</strong> <span class="muted">— students aren't required to quote group provision. Add them now, or skip with <strong>Continue</strong> and add them later (you can also add them inside each group).</span></span>
-          </div>` : ""}
+          </div>` : `
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #f6f2fc; border: 1px solid #e6dcf1; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;">
+            <span class="muted">Each student starts from your <strong>Provision setup</strong> defaults — adjust SEND, documents and any per-student details below.</span>
+          </div>`}
           <div class="button-row" style="margin-bottom: 4px;">
             <button class="btn add-action" type="button" data-add-student-action>+ Add student</button>
             <button class="btn ghost" type="button" data-collapse-students="all">Collapse all</button>
@@ -2474,139 +2490,44 @@
               </div>
             </div>
             <div class="student-fields">
-              <div class="field">
-                <label>First name</label>
-                <input value="${student.firstName}" data-student="${index}" data-field="firstName" />
-              </div>
-              <div class="field">
-                <label>Surname</label>
-                <input value="${student.surname}" data-student="${index}" data-field="surname" />
-              </div>
-              <div class="field">
-                <label>Email</label>
-                <input value="${student.email}" data-student="${index}" data-field="email" />
-              </div>
-              <div class="field">
-                <label>Year group</label>
-                <select data-student="${index}" data-field="yearGroup">
-                  ${yearGroups.map((year) => `<option ${student.yearGroup === year ? "selected" : ""}>${year}</option>`).join("")}
-                </select>
-              </div>
-              <div class="field">
-                <label>Parent/carer name</label>
-                <input value="${student.parentName}" data-student="${index}" data-field="parentName" />
-              </div>
-              <div class="field">
-                <label>Parent/carer email</label>
-                <input value="${student.parentEmail}" data-student="${index}" data-field="parentEmail" />
-              </div>
-              <div class="field">
-                <label>Parent/carer phone</label>
-                <input value="${student.parentPhone}" data-student="${index}" data-field="parentPhone" />
-              </div>
+              <div class="field"><label>First name</label><input value="${student.firstName}" data-student="${index}" data-field="firstName" /></div>
+              <div class="field"><label>Surname</label><input value="${student.surname}" data-student="${index}" data-field="surname" /></div>
+              <div class="field"><label>Email</label><input value="${student.email}" data-student="${index}" data-field="email" /></div>
+              <div class="field"><label>Year group</label><select data-student="${index}" data-field="yearGroup">${yearGroups.map((year) => `<option ${student.yearGroup === year ? "selected" : ""}>${year}</option>`).join("")}</select></div>
+              <div class="field"><label>Parent/carer name</label><input value="${student.parentName}" data-student="${index}" data-field="parentName" /></div>
+              <div class="field"><label>Parent/carer email</label><input value="${student.parentEmail}" data-student="${index}" data-field="parentEmail" /></div>
+              <div class="field"><label>Parent/carer phone</label><input value="${student.parentPhone}" data-student="${index}" data-field="parentPhone" /></div>
             </div>
-          </article>
-        `).join("")}
-        `;
-      }
-
-      function renderNeedsRows() {
-        if (isGroupProduct()) {
-          renderGroupNeedsRows();
-          return;
-        }
-
-        const product = getProduct();
-        const addons = getAddons();
-        refs.needsRows.innerHTML = `
-          <div class="button-row" style="margin-bottom: 12px;">
-            <span class="tag">You are configuring ${product.name}</span>
-            <button class="btn add-action" type="button" data-add-student-action>+ Add student</button>
-            <button class="btn ghost" type="button" data-collapse-needs="all">Collapse all</button>
-            <button class="btn ghost" type="button" data-expand-needs="all">Expand all</button>
-          </div>
-          ${state.students.map((student, index) => `
-          <article class="needs-card ${state.collapsedNeeds[student.id] ? "collapsed" : ""}">
-            <div class="needs-card-head">
-              <div>
-                <h3>${student.firstName || "Student"} ${student.surname || ""}</h3>
-                <p class="muted">${student.yearGroup} - ${student.email || "Email missing"}</p>
-              </div>
-              <div class="button-row">
-                <span class="tag">${product.subCategories.find((item) => item.id === student.subCategory)?.label || product.subCategories[0].label}</span>
-                <button class="btn ghost" type="button" data-toggle-needs-card="${student.id}">${state.collapsedNeeds[student.id] ? "Expand" : "Collapse"}</button>
-              </div>
-            </div>
-            <div class="needs-fields">
+            ${!group ? `
+            <div class="needs-fields" style="margin-top: 14px;">
               <div class="field field-wide">
                 <label>Sub-category</label>
                 <select data-student="${index}" data-field="subCategory">
                   ${product.subCategories.map((sub) => `<option value="${sub.id}" ${student.subCategory === sub.id ? "selected" : ""}>${sub.label}${sub.price ? ` - ${formatCompactMoney(sub.price)}/${sub.unit}` : ""}</option>`).join("")}
                 </select>
               </div>
-              <div class="field">
-                <label>Subject / focus</label>
-                <select data-student="${index}" data-field="subject">
-                  ${subjects.map((subject) => `<option ${student.subject === subject ? "selected" : ""}>${subject}</option>`).join("")}
-                </select>
-              </div>
-              <div class="field">
-                <label>Support profile</label>
-                <select data-student="${index}" data-field="supportProfile">
-                  ${supportProfiles.map((profile) => `<option ${student.supportProfile === profile ? "selected" : ""}>${profile}</option>`).join("")}
-                </select>
-              </div>
-              <div class="field">
-                <label>Start date</label>
-                <input type="date" value="${student.startDate}" data-student="${index}" data-field="startDate" />
-              </div>
-              <div class="field">
-                <label>End date</label>
-                <input type="date" value="${student.endDate}" data-student="${index}" data-field="endDate" />
-              </div>
-              <div class="field">
-                <label>Duration</label>
-                <div style="padding: 9px 0; font-weight: 600;">${studentWeeks(student)} weeks <span class="muted">(from dates)</span></div>
-              </div>
-              ${state.product === "compass" ? `
-              <div class="field">
-                <label>Hours / week</label>
-                <select data-student="${index}" data-field="hoursPerWeek">
-                  ${[1, 2, 3, 4, 5, 6].map((hours) => `<option value="${hours}" ${Number(student.hoursPerWeek) === hours ? "selected" : ""}>${hours}</option>`).join("")}
-                </select>
-              </div>` : ""}
+              <div class="field"><label>Subject / focus</label><select data-student="${index}" data-field="subject">${subjects.map((subject) => `<option ${student.subject === subject ? "selected" : ""}>${subject}</option>`).join("")}</select></div>
+              <div class="field"><label>Support profile</label><select data-student="${index}" data-field="supportProfile">${supportProfiles.map((profile) => `<option ${student.supportProfile === profile ? "selected" : ""}>${profile}</option>`).join("")}</select></div>
+              <div class="field"><label>Start date</label><input type="date" value="${student.startDate}" data-student="${index}" data-field="startDate" /></div>
+              <div class="field"><label>End date</label><input type="date" value="${student.endDate}" data-student="${index}" data-field="endDate" /></div>
+              <div class="field"><label>Duration</label><div style="padding: 9px 0; font-weight: 600;">${studentWeeks(student)} weeks <span class="muted">(from dates)</span></div></div>
+              ${state.product === "compass" ? `<div class="field"><label>Hours / week</label><select data-student="${index}" data-field="hoursPerWeek">${[1, 2, 3, 4, 5, 6].map((hours) => `<option value="${hours}" ${Number(student.hoursPerWeek) === hours ? "selected" : ""}>${hours}</option>`).join("")}</select></div>` : ""}
             </div>
             <div class="needs-extra" style="display: grid; gap: 14px; margin-top: 14px;">
               <div class="field field-wide">
                 <label>SEND needs (optional, multi-select)</label>
                 <div class="addon-option-grid">
-                  ${sendOptions.map((opt) => `
-                    <label class="addon-check">
-                      <input type="checkbox" data-send-toggle="${opt}" data-student="${index}" ${(student.sendNeeds || []).includes(opt) ? "checked" : ""} />
-                      <span class="addon-option-content"><strong>${opt}</strong></span>
-                    </label>`).join("")}
+                  ${sendOptions.map((opt) => `<label class="addon-check"><input type="checkbox" data-send-toggle="${opt}" data-student="${index}" ${(student.sendNeeds || []).includes(opt) ? "checked" : ""} /><span class="addon-option-content"><strong>${opt}</strong></span></label>`).join("")}
                 </div>
               </div>
               ${state.product === "compass" ? `
               <div class="field field-wide">
                 <label>Preferred session times (optional · 1:1 scheduling)</label>
-                <label class="inline-check" style="margin: 4px 0 8px;">
-                  <input type="checkbox" data-avail-flexible data-student="${index}" ${student.availFlexible !== false ? "checked" : ""} />
-                  <span><strong>Flexible</strong> <span class="muted">any time works — we'll propose slots</span></span>
-                </label>
+                <label class="inline-check" style="margin: 4px 0 8px;"><input type="checkbox" data-avail-flexible data-student="${index}" ${student.availFlexible !== false ? "checked" : ""} /><span><strong>Flexible</strong> <span class="muted">any time works — we'll propose slots</span></span></label>
                 ${student.availFlexible === false ? `
                 <div style="display: grid; gap: 12px;">
-                  <div class="addon-option-grid">
-                    ${availabilityDays.map((day) => `
-                      <label class="addon-check">
-                        <input type="checkbox" data-avail-day="${day}" data-student="${index}" ${(student.availDays || []).includes(day) ? "checked" : ""} />
-                        <span class="addon-option-content"><strong>${day}</strong></span>
-                      </label>`).join("")}
-                  </div>
-                  <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <div class="field"><label>Earliest</label><input type="time" data-student="${index}" data-field="availFrom" value="${student.availFrom || ""}" /></div>
-                    <div class="field"><label>Latest</label><input type="time" data-student="${index}" data-field="availTo" value="${student.availTo || ""}" /></div>
-                  </div>
+                  <div class="addon-option-grid">${availabilityDays.map((day) => `<label class="addon-check"><input type="checkbox" data-avail-day="${day}" data-student="${index}" ${(student.availDays || []).includes(day) ? "checked" : ""} /><span class="addon-option-content"><strong>${day}</strong></span></label>`).join("")}</div>
+                  <div style="display: flex; gap: 12px; flex-wrap: wrap;"><div class="field"><label>Earliest</label><input type="time" data-student="${index}" data-field="availFrom" value="${student.availFrom || ""}" /></div><div class="field"><label>Latest</label><input type="time" data-student="${index}" data-field="availTo" value="${student.availTo || ""}" /></div></div>
                   <div class="field"><label>Timing notes</label><input data-student="${index}" data-field="availNote" value="${student.availNote || ""}" placeholder="e.g. avoid Monday mornings" /></div>
                 </div>` : ""}
               </div>` : ""}
@@ -2623,19 +2544,41 @@
             <div class="addon-options">
               <strong>Add-ons, optional multi-select</strong>
               <div class="addon-option-grid">
-                ${addons.filter((addon) => addon.id !== "none").map((addon, addonIndex) => `
-                  <label class="addon-check">
-                    <input type="checkbox" data-addon-toggle="${addon.id}" data-student="${index}" ${student.addonIds?.includes(addon.id) ? "checked" : ""} />
-                    <span class="addon-option-content">
-                      <span class="option-pill ${getPillClass(addon, addonIndex)}">${addon.name}</span>
-                      <span class="addon-note">${formatMoney(addon.price)} ex-VAT · ${addon.unit}${addon.passThrough ? " · pass-through fees separate" : ""}</span>
-                    </span>
-                  </label>
-                `).join("")}
+                ${addons.filter((addon) => addon.id !== "none").map((addon, addonIndex) => `<label class="addon-check"><input type="checkbox" data-addon-toggle="${addon.id}" data-student="${index}" ${student.addonIds?.includes(addon.id) ? "checked" : ""} /><span class="addon-option-content"><span class="option-pill ${getPillClass(addon, addonIndex)}">${addon.name}</span><span class="addon-note">${formatMoney(addon.price)} ex-VAT · ${addon.unit}${addon.passThrough ? " · pass-through fees separate" : ""}</span></span></label>`).join("")}
               </div>
-            </div>
+            </div>` : ""}
           </article>
         `).join("")}
+        `;
+      }
+
+      function renderNeedsRows() {
+        if (isGroupProduct()) { renderGroupNeedsRows(); return; }
+        renderStudentRows();
+      }
+
+      function renderProvisionSetup() {
+        const product = getProduct();
+        const d = state.defaults;
+        if (!d.subCategory || !product.subCategories.some((s) => s.id === d.subCategory)) d.subCategory = product.subCategories[0].id;
+        refs.needsRows.innerHTML = `
+          <p class="muted" style="margin: 0 0 14px;">Set the common provision details once — every student you add next inherits these. You can override any of them per student.</p>
+          <div class="needs-card">
+            <div class="needs-fields">
+              <div class="field field-wide">
+                <label>Sub-category</label>
+                <select data-default="subCategory">
+                  ${product.subCategories.map((sub) => `<option value="${sub.id}" ${d.subCategory === sub.id ? "selected" : ""}>${sub.label}${sub.price ? ` - ${formatCompactMoney(sub.price)}/${sub.unit}` : ""}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field"><label>Subject / focus</label><select data-default="subject">${subjects.map((s) => `<option ${d.subject === s ? "selected" : ""}>${s}</option>`).join("")}</select></div>
+              <div class="field"><label>Support profile</label><select data-default="supportProfile">${supportProfiles.map((p) => `<option ${d.supportProfile === p ? "selected" : ""}>${p}</option>`).join("")}</select></div>
+              <div class="field"><label>Start date</label><input type="date" data-default="startDate" value="${d.startDate}" /></div>
+              <div class="field"><label>End date</label><input type="date" data-default="endDate" value="${d.endDate}" /></div>
+              ${state.product === "compass" ? `<div class="field"><label>Hours / week</label><select data-default="hoursPerWeek">${[1, 2, 3, 4, 5, 6].map((h) => `<option value="${h}" ${Number(d.hoursPerWeek) === h ? "selected" : ""}>${h}</option>`).join("")}</select></div>` : ""}
+            </div>
+          </div>
+          <p class="muted" style="margin: 12px 0 0;">Next → add your students; they'll start from these defaults.</p>
         `;
       }
 
@@ -3017,8 +2960,8 @@
 
         renderProgress();
         if (state.step === 0) renderProducts();
-        if (state.step === 1) { if (isGroupProduct()) renderNeedsRows(); else renderStudentRows(); }
-        if (state.step === 2) { if (isGroupProduct()) renderStudentRows(); else renderNeedsRows(); }
+        if (state.step === 1) { if (isGroupProduct()) renderGroupNeedsRows(); else renderProvisionSetup(); }
+        if (state.step === 2) renderStudentRows();
         if (state.step === 3) {
           renderPaymentOptions();
           renderPaymentDetail();
@@ -3030,8 +2973,8 @@
       function renderAll() {
         renderProducts();
         applyStepOrder();
+        if (isGroupProduct()) renderGroupNeedsRows(); else renderProvisionSetup();
         renderStudentRows();
-        renderNeedsRows();
         renderPaymentOptions();
         renderPaymentDetail();
         renderQuote();
@@ -3099,6 +3042,7 @@
         const productCard = event.target.closest("[data-product]");
         if (productCard) {
           state.product = productCard.dataset.product;
+          if (state.defaults) state.defaults.subCategory = "";
           state.students = state.students.map((student) => normaliseStudent({
             ...student,
             subCategory: products[state.product].subCategories[0].id,
@@ -3273,6 +3217,13 @@
       });
 
       document.addEventListener("input", (event) => {
+        const defFieldInput = event.target.dataset.default;
+        if (defFieldInput) {
+          if (!state.defaults) state.defaults = {};
+          state.defaults[defFieldInput] = event.target.value;
+          saveDraft();
+          return;
+        }
         const financeField = event.target.dataset.finance;
         if (financeField) {
           if (!state.finance) state.finance = { name: "", email: "", phone: "", department: "" };
@@ -3301,6 +3252,13 @@
         const groupField = event.target.dataset.groupField;
         const groupDayTime = event.target.dataset.groupDayTime;
         const timeField = event.target.dataset.timeField;
+
+        if (event.target.dataset.default) {
+          if (!state.defaults) state.defaults = {};
+          state.defaults[event.target.dataset.default] = event.target.value;
+          saveDraft();
+          return;
+        }
 
         if (groupIndex !== undefined && groupField) {
           state.groups[Number(groupIndex)][groupField] = event.target.value;
