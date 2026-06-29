@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>course-enrolment CE — standalone test harness</title>
+  <!--
+    Minimal harness that mimics what Wix does: drop the <course-enrolment> tag on a page
+    and load the element's source script. Open with ?mock for offline backend.
+    This verifies CE mechanics (register / render / bridge-mock / dynamic growth) in a plain
+    browser. The Wix-specific page auto-height reflow is verified on the live Wix site.
+  -->
+  <style>body { margin: 0; background: #faf9fd; }</style>
+</head>
+<body>
+  <course-enrolment></course-enrolment>
+  <script src="./course-enrolment.js"></script>
+</body>
+</html>
