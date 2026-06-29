@@ -28,7 +28,7 @@
   }
 
   class CourseEnrolment extends HTMLElement {
-    static get observedAttributes() { return ['member', 'api-reply']; }
+    static get observedAttributes() { return ['member', 'products', 'api-reply']; }
 
     constructor() {
       super();
@@ -63,6 +63,12 @@
       if (newV == null || newV === oldV) return;
       if (name === 'member') {
         try { this._member = JSON.parse(newV); this._memberResolve(this._member); } catch (e) { /* ignore */ }
+      } else if (name === 'products') {
+        // PUSH-ONLY: Velo pushes the catalog here (no CE->Velo event; this site's CE has no .on()).
+        var data;
+        try { data = JSON.parse(newV); } catch (e) { this._setStatus('Bad products payload', true); return; }
+        if (data && data.error) { this._setStatus('Products load failed: ' + data.error, true); return; }
+        this._renderProducts(Array.isArray(data) ? data : []);
       } else if (name === 'api-reply') {
         var msg;
         try { msg = JSON.parse(newV); } catch (e) { return; }
@@ -118,14 +124,19 @@
 
     _boot() {
       var self = this;
-      this._memberReady
-        .then(function () {
-          self._setWelcome();
-          self._setStatus('Member received — loading products from backend…');
-          return self._call('api:listProducts');
-        })
-        .then(function (products) { self._renderProducts(products || []); })
-        .catch(function (e) { self._setStatus('Boot failed: ' + (e && e.message), true); });
+      this._memberReady.then(function () {
+        self._setWelcome();
+        if (MOCK) {
+          // standalone: no Velo to push products -> fetch the mock catalog directly
+          self._setStatus('Member received — loading mock products…');
+          self._mockCall('api:listProducts')
+            .then(function (products) { self._renderProducts(products || []); })
+            .catch(function (e) { self._setStatus('Mock load failed: ' + (e && e.message), true); });
+        } else {
+          // live: Velo pushes the 'products' attribute -> handled in attributeChangedCallback
+          self._setStatus('Member received — waiting for products from Wix…');
+        }
+      });
     }
 
     // ---- rendering (light DOM; styles scoped by the `course-enrolment` tag prefix) ----
