@@ -1,0 +1,119 @@
+[
+  {
+    "addonId": "dist_exam_centre",
+    "productId": "distinction",
+    "displayName": "Exam Centre Placement Guarantee",
+    "description": "Guaranteed exam centre slot",
+    "priceGbp": 650,
+    "priceUnit": "per_student_per_series",
+    "passThrough": "Exam centre, access arrangement, invigilation, and late fees passed through separately"
+  },
+  {
+    "addonId": "dist_enhanced_marking",
+    "productId": "distinction",
+    "displayName": "Enhanced Marking with Written Action Plan",
+    "description": "Per paper",
+    "priceGbp": 140,
+    "priceUnit": "per_paper",
+    "passThrough": ""
+  },
+  {
+    "addonId": "dist_diagnostic",
+    "productId": "distinction",
+    "displayName": "Monthly Diagnostic Deep-dive",
+    "description": "Per student per subject per month",
+    "priceGbp": 98,
+    "priceUnit": "per_student_per_subject_per_month",
+    "passThrough": ""
+  },
+  {
+    "addonId": "compass_send_badge_qa",
+    "productId": "compass",
+    "displayName": "SEND Badge + Human QA",
+    "description": "Per hour uplift",
+    "priceGbp": 5,
+    "priceUnit": "per_hour_uplift",
+    "passThrough": ""
+  },
+  {
+    "addonId": "compass_attendance_data",
+    "productId": "compass",
+    "displayName": "Attendance Data Filling",
+    "description": "Monthly attendance data filling per student",
+    "priceGbp": 100,
+    "priceUnit": "per_student_per_month",
+    "passThrough": ""
+  },
+  {
+    "addonId": "compass_parent_communication",
+    "productId": "compass",
+    "displayName": "Parent communication",
+    "description": "Monthly parent communication per student",
+    "priceGbp": 100,
+    "priceUnit": "per_student_per_month",
+    "passThrough": ""
+  },
+  {
+    "addonId": "compass_ehcp",
+    "productId": "compass",
+    "displayName": "EHCP Annual Review Written Input",
+    "description": "Per student per document",
+    "priceGbp": 650,
+    "priceUnit": "per_student_per_document",
+    "passThrough": ""
+  },
+  {
+    "addonId": "blueprint_regrouping",
+    "productId": "blueprint",
+    "displayName": "Monthly Regrouping Review",
+    "description": "Monthly regrouping review per student",
+    "priceGbp": 50,
+    "priceUnit": "per_student_per_month",
+    "passThrough": ""
+  },
+  {
+    "addonId": "blueprint_reintegration",
+    "productId": "blueprint",
+    "displayName": "Reintegration Analysis",
+    "description": "Monthly reintegration analysis per student",
+    "priceGbp": 100,
+    "priceUnit": "per_student_per_month",
+    "passThrough": ""
+  },
+  {
+    "addonId": "blueprint_mock_analysis",
+    "productId": "blueprint",
+    "displayName": "Mock Exam + Analysis",
+    "description": "Per student per subject per mock",
+    "priceGbp": 220,
+    "priceUnit": "per_student_per_subject_per_mock",
+    "passThrough": ""
+  },
+  {
+    "addonId": "academy_exam_centre",
+    "productId": "academy",
+    "displayName": "Exam Centre Placement Guarantee",
+    "description": "Guaranteed exam centre slot",
+    "priceGbp": 650,
+    "priceUnit": "per_student_per_series",
+    "passThrough": "Exam centre fees, entry fees, late fees, access arrangements, and invigilation passed through separately"
+  },
+  {
+    "addonId": "academy_parent_liaison",
+    "productId": "academy",
+    "displayName": "Parent liaison",
+    "description": "Active parent communication / engagement",
+    "priceGbp": 150,
+    "priceUnit": "per_student_per_month",
+    "passThrough": ""
+  },
+  {
+    "addonId": "academy_monthly_progress",
+    "productId": "academy",
+    "displayName": "Monthly progress report",
+    "description": "Monthly written report per student",
+    "priceGbp": 60,
+    "priceUnit": "per_student_per_month",
+    "passThrough": ""
+  }
+]

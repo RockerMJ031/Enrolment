@@ -1,0 +1,273 @@
+[
+  {
+    "productId": "distinction",
+    "displayName": "Distinction",
+    "description": "Cat D · Outcome-focused academic tutoring",
+    "yearGroupTags": [
+      "Y10",
+      "Y11",
+      "Y12",
+      "Y13"
+    ],
+    "configV2": {
+      "lowVolumeUpliftCapValue": 7500,
+      "lowVolumeUpliftRate": 0.3,
+      "customTimingUpliftRate": 0.2,
+      "setupFee": 0,
+      "marketing": {
+        "subtitle": "Outcome-focused academic tutoring",
+        "included": [
+          "Outcome-led academic tutoring",
+          "Subject-specific intervention",
+          "Progress against defined academic goal",
+          "Clear product boundary"
+        ],
+        "priceDisplay": "£37.50",
+        "baseService": "Targeted tutoring with explicit academic outcomes, bounded scope, and clear success criteria.",
+        "rateLabel": "£37.50/hour",
+        "priceUnit": "/ hour ex-VAT",
+        "bestFor": [
+          "Defined grade outcomes",
+          "Subject intervention",
+          "Retention-focused academic support"
+        ],
+        "badge": "Outcome-focused",
+        "additionalCharges": [
+          "Total enrolment is below 200 hours",
+          "Custom start/end times outside :00 or :30 are requested (+20%)",
+          "Monthly diagnostic deep-dive is requested",
+          "Exam centre placement support is required"
+        ],
+        "cat": "Cat D",
+        "notSuitable": [
+          "Unlimited bespoke schooling",
+          "Unbounded academic support",
+          "Broad timetable replacement"
+        ]
+      },
+      "mode": "group",
+      "subCategories": [
+        {
+          "id": "distinction",
+          "label": "Distinction tutoring",
+          "price": 37.5,
+          "unit": "hour"
+        }
+      ],
+      "baseRate": 37.5,
+      "lowVolumeThresholdHours": 200
+    },
+    "subCategoriesText": "£37.50/hour",
+    "basePriceGbp": 37.5,
+    "priceUnit": "per_student",
+    "setupFeeGbp": 0,
+    "setupFeeWaiverRule": ""
+  },
+  {
+    "productId": "compass",
+    "displayName": "Compass",
+    "description": "Cat C · SEND-informed specialist tutoring",
+    "yearGroupTags": [
+      "Y3",
+      "Y4",
+      "Y5",
+      "Y6",
+      "Y7",
+      "Y8",
+      "Y9",
+      "Y10",
+      "Y11",
+      "Y12",
+      "Y13"
+    ],
+    "configV2": {
+      "customTimingUpliftRate": 0,
+      "setupFee": 0,
+      "marketing": {
+        "subtitle": "SEND-informed specialist tutoring",
+        "included": [
+          "Default 1:1 support model",
+          "Minimum 8-week structure",
+          "SEND-informed teaching approach",
+          "Structured communication boundaries"
+        ],
+        "priceDisplay": "£37.50",
+        "baseService": "Specialist tutoring informed by SEND, ESOL, learning gaps, and support intensity. It is not therapy.",
+        "rateLabel": "£37.50/hour",
+        "priceUnit": "/ hour ex-VAT",
+        "bestFor": [
+          "SEND-informed tutoring",
+          "ESOL or learning gaps",
+          "Specialist engagement support"
+        ],
+        "badge": "SEND-informed",
+        "additionalCharges": [
+          "EHCP annual review written input is requested",
+          "SEND Badge + Human QA is requested",
+          "Parent communication or LA attendance data support is required"
+        ],
+        "cat": "Cat C",
+        "notSuitable": [
+          "Therapy or clinical intervention",
+          "Unbounded parent support",
+          "Medical or diagnostic provision"
+        ]
+      },
+      "mode": "student",
+      "subCategories": [
+        {
+          "id": "compass",
+          "label": "Compass support",
+          "price": 37.5,
+          "unit": "hour"
+        }
+      ],
+      "baseRate": 37.5
+    },
+    "subCategoriesText": "£37.50/hour",
+    "basePriceGbp": 37.5,
+    "priceUnit": "per_student",
+    "setupFeeGbp": 0,
+    "setupFeeWaiverRule": ""
+  },
+  {
+    "productId": "blueprint",
+    "displayName": "Blueprint",
+    "description": "Cat B · Curriculum-aligned bespoke provision",
+    "yearGroupTags": [
+      "Y3",
+      "Y4",
+      "Y5",
+      "Y6",
+      "Y7",
+      "Y8",
+      "Y9",
+      "Y10",
+      "Y11"
+    ],
+    "configV2": {
+      "customTimingUpliftRate": 0.2,
+      "setupFee": 200,
+      "marketing": {
+        "subtitle": "Curriculum-aligned bespoke provision",
+        "included": [
+          "Curriculum-aligned setup",
+          "Scheme-of-work mapping",
+          "Reintegration-oriented design",
+          "Stakeholder coordination"
+        ],
+        "priceDisplay": "£29.17",
+        "baseService": "Bespoke provision aligned to timetable, scheme of work, level data, and reintegration pathway.",
+        "rateLabel": "£29.17/hour",
+        "priceUnit": "/ hour ex-VAT",
+        "bestFor": [
+          "Timetable-aligned provision",
+          "Scheme-of-work continuity",
+          "Reintegration pathway support"
+        ],
+        "badge": "Best value",
+        "additionalCharges": [
+          "Fewer than 10 classes and fewer than 200 total hours",
+          "Custom start/end times outside :00 or :30 are requested (+20%)",
+          "Mock exam, reintegration, or regrouping review is requested",
+          "Timetable changes are requested after setup"
+        ],
+        "cat": "Cat B",
+        "notSuitable": [
+          "Ad-hoc one-off tutoring",
+          "No curriculum alignment need",
+          "Very small requests avoiding setup"
+        ]
+      },
+      "setupClassThreshold": 10,
+      "setupHourThreshold": 200,
+      "mode": "group",
+      "subCategories": [
+        {
+          "id": "blueprint",
+          "label": "Blueprint provision",
+          "price": 29.17,
+          "unit": "hour"
+        }
+      ],
+      "baseRate": 29.17
+    },
+    "subCategoriesText": "£29.17/hour",
+    "basePriceGbp": 29.17,
+    "priceUnit": "per_student",
+    "setupFeeGbp": 200,
+    "setupFeeWaiverRule": "min_students:5"
+  },
+  {
+    "productId": "academy",
+    "displayName": "Academy",
+    "description": "Cat A · 48-hour Alternative Provision Online School",
+    "yearGroupTags": [
+      "Y3",
+      "Y4",
+      "Y5",
+      "Y6",
+      "Y7",
+      "Y8",
+      "Y9",
+      "Y10",
+      "Y11",
+      "Y12",
+      "Y13"
+    ],
+    "configV2": {
+      "customTimingUpliftRate": 0,
+      "setupFee": 0,
+      "marketing": {
+        "subtitle": "48-hour Alternative Provision Online School",
+        "included": [
+          "48-hour onboarding target",
+          "Minimum 4-week structure",
+          "Standard 1:6 live group teaching model",
+          "Attendance and onboarding visibility"
+        ],
+        "priceDisplay": "£139 Core · £169 Full",
+        "baseService": "A fast-start online Alternative Provision route for UK schools and Local Authorities that need suitable education arranged quickly. Standard delivery uses a 1:6 live group model; Purple Ruler allocates each student to the right Academy group.",
+        "rateLabel": "Core £139/week, Full £169/week",
+        "priceUnit": "/ student / week ex-VAT",
+        "bestFor": [
+          "UK schools needing a rapid AP start",
+          "Local Authorities arranging suitable education quickly",
+          "Students suited to a standard online provision route"
+        ],
+        "badge": "48h target",
+        "additionalCharges": [
+          "Monthly reporting or parent liaison is requested",
+          "Exam centre placement support is required",
+          "Client requests work beyond standard group allocation"
+        ],
+        "cat": "Cat A",
+        "notSuitable": [
+          "Bespoke curriculum design",
+          "School timetable synchronisation",
+          "Exclusive cohort requests"
+        ]
+      },
+      "mode": "student",
+      "subCategories": [
+        {
+          "id": "core",
+          "label": "Core Subject",
+          "price": 139,
+          "unit": "week"
+        },
+        {
+          "id": "full",
+          "label": "Full Subject",
+          "price": 169,
+          "unit": "week"
+        }
+      ]
+    },
+    "subCategoriesText": "Core £139/wk, Full £169/wk",
+    "basePriceGbp": 139,
+    "priceUnit": "per_student",
+    "setupFeeGbp": 0,
+    "setupFeeWaiverRule": ""
+  }
+]

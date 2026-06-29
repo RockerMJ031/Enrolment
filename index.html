@@ -1546,6 +1546,7 @@
         }
       }
     </style>
+  <script src="https://js.stripe.com/v3/"></script>
   </head>
   <body>
     <div class="app">
@@ -1734,7 +1735,10 @@
       </div>
     </div>
 
-    <script>
+    <script type="module">
+      import * as api from './lib/api.js';
+      import { getMember, isMock } from './lib/bridge.js';
+      import { initStripeElements, confirmPayment } from './lib/stripe.js';
       const yearGroups = ["Year 3", "Year 4", "Year 5", "Year 6", "Year 7", "Year 8", "Year 9", "Year 10", "Year 11", "Year 12", "Year 13"];
       const subjects = ["Maths", "English", "Science", "ESOL", "Humanities", "Full curriculum"];
       const supportProfiles = ["Standard", "Learning gaps", "SEND-informed support", "ESOL", "Reintegration"];
@@ -1753,7 +1757,7 @@
       const scheduleTimeOptions = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00"];
       const gradeOptions = ["Below expected", "Working towards", "Expected", "Greater depth", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9"];
 
-      const products = {
+      let products = {
         academy: {
           name: "Cat A · Academy",
           subtitle: "48-hour Alternative Provision Online School",
@@ -1819,7 +1823,7 @@
         }
       };
 
-      const addonCatalog = {
+      let addonCatalog = {
         academy: [
           { id: "none", name: "No add-on", price: 0, unit: "" },
           { id: "academy_enrichment", name: "Enrichment: PSHE, PE & Careers (3 lessons/week)", price: 35, unit: "per student / week" },
@@ -2273,6 +2277,9 @@
             lowVolumeUplift = toMoneyValue(Math.min(uncapped, capRoom));
             lowVolumeUpliftCapped = uncapped > capRoom;
           }
+          const beforeDiscount = toMoneyValue(subtotal + lowVolumeUplift);
+          const discountRate = state.paymentMethod === "stripe" ? 0.05 : 0;
+          const discountAmount = toMoneyValue(beforeDiscount * discountRate);
           return {
             mode: "group",
             groupLines,
@@ -2281,7 +2288,10 @@
             setupFee: setupInfo.setupFee,
             setupFeeReason: setupInfo.setupFeeReason,
             setupFeeWaived: setupInfo.setupFeeWaived,
-            total: toMoneyValue(subtotal + lowVolumeUplift),
+            beforeDiscount,
+            discountRate,
+            discountAmount,
+            total: toMoneyValue(beforeDiscount - discountAmount),
             lowVolumeUplift,
             lowVolumeUpliftCapped,
             distinctionHours
@@ -2296,6 +2306,9 @@
         const lowVolumeUplift = state.product === "distinction" && distinctionHours > 0 && distinctionHours < products.distinction.thresholdHours
           ? toMoneyValue(total * products.distinction.upliftRate)
           : 0;
+        const beforeDiscount = toMoneyValue(total + lowVolumeUplift);
+        const discountRate = state.paymentMethod === "stripe" ? 0.05 : 0;
+        const discountAmount = toMoneyValue(beforeDiscount * discountRate);
         return {
           mode: "student",
           lines,
@@ -2304,7 +2317,10 @@
           setupFee: 0,
           setupFeeReason: "",
           setupFeeWaived: false,
-          total: toMoneyValue(total + lowVolumeUplift),
+          beforeDiscount,
+          discountRate,
+          discountAmount,
+          total: toMoneyValue(beforeDiscount - discountAmount),
           lowVolumeUplift,
           lowVolumeUpliftCapped: false,
           distinctionHours
@@ -2880,6 +2896,15 @@
           `;
         }
 
+        if (quote.discountAmount) {
+          refs.quoteLines.innerHTML += `
+            <div class="uplift-line" title="5% card prepayment discount on ex-VAT subtotal">
+              <div><span class="tag teal">Card prepayment</span></div>
+              <strong>5% prepayment discount</strong>
+              <div class="quote-line"><span>Applied because you pay by card</span><strong>-${formatMoney(quote.discountAmount)}</strong></div>
+            </div>
+          `;
+        }
         refs.quoteTotal.textContent = formatMoney(quote.total);
         refs.quoteVat.textContent = formatMoney(vatAmount);
         refs.quoteIncTotal.textContent = formatMoney(totalInclVat);
@@ -3390,9 +3415,8 @@
       });
 
       document.getElementById("nextBtn").addEventListener("click", () => {
-        if (state.step < 4) state.step += 1;
-        else if (state.step === 4) state.step = 5;
-        renderStep();
+        if (state.step < 4) { state.step += 1; renderStep(); }
+        else if (state.step === 4) { doSubmit(); }
       });
 
       document.getElementById("backBtn").addEventListener("click", () => {
@@ -3402,8 +3426,153 @@
 
       document.getElementById("saveBtn").addEventListener("click", saveDraft);
 
-      renderAll();
-      renderStep();
+      // ===== CMS-driven boot (products/addons/member via bridge → backend) =====
+      function __adaptProduct(p) {
+        const c = p.configV2 || {};
+        const m = c.marketing || {};
+        return {
+          productId: p.productId,
+          name: m.cat ? `${m.cat} · ${p.displayName}` : p.displayName,
+          subtitle: m.subtitle || p.description || "",
+          rateLabel: m.rateLabel || "",
+          priceDisplay: m.priceDisplay || "",
+          priceUnit: m.priceUnit || "",
+          baseService: m.baseService || "",
+          bestFor: m.bestFor || [],
+          included: m.included || [],
+          additionalCharges: m.additionalCharges || [],
+          notSuitable: m.notSuitable || [],
+          subCategories: c.subCategories || [],
+          baseRate: c.baseRate,
+          setupFee: c.setupFee || 0,
+          setupClassThreshold: c.setupClassThreshold || 10,
+          setupHourThreshold: c.setupHourThreshold || 200,
+          customTimingUpliftRate: c.customTimingUpliftRate || 0,
+          thresholdHours: c.lowVolumeThresholdHours,
+          upliftRate: c.lowVolumeUpliftRate,
+          upliftCapValue: c.lowVolumeUpliftCapValue,
+          mode: c.mode || "student",
+        };
+      }
+      function __adaptAddon(a) {
+        return { id: a.addonId, name: a.displayName, price: a.priceGbp, unit: a.priceUnit, passThrough: a.passThrough || "", description: a.description || "" };
+      }
+      const __PRODUCT_ORDER = ["academy", "blueprint", "compass", "distinction"];
+
+      async function bootData() {
+        try {
+          const member = await api.getMemberContext().catch(() => null);
+          window.__enrolMember = member;
+          let list = await api.listProducts();
+          list = (list || []).slice().sort((a, b) => __PRODUCT_ORDER.indexOf(a.productId) - __PRODUCT_ORDER.indexOf(b.productId));
+          const adapted = {};
+          for (const p of list) adapted[p.productId] = __adaptProduct(p);
+          products = adapted;
+          if (!products[state.product]) state.product = Object.keys(products)[0];
+          addonCatalog = {};
+          for (const pid of Object.keys(products)) {
+            try {
+              const al = await api.listAddons(pid);
+              addonCatalog[pid] = [{ id: "none", name: "No add-on", price: 0, unit: "" }].concat((al || []).map(__adaptAddon));
+            } catch (_) { addonCatalog[pid] = [{ id: "none", name: "No add-on", price: 0, unit: "" }]; }
+          }
+          const mn = document.getElementById("memberName");
+          if (mn && member && member.name) mn.textContent = member.name.trim() || member.email || "";
+          renderAll();
+          renderStep();
+        } catch (e) {
+          console.error("[enrolment] boot failed:", e);
+          const host = document.querySelector(".workspace") || document.body;
+          host.innerHTML = '<div style="padding:48px;font-family:Inter,system-ui,sans-serif;color:#333">Could not load enrolment data. Please refresh. <br><small>' + ((e && e.message) || e) + '</small></div>';
+        }
+      }
+      // ===== Submit → backend (submitEnrolment) + Stripe =====
+      function __studentsPayload() {
+        return state.students.map((s) => ({
+          id: s.id, firstName: s.firstName, surname: s.surname, email: s.email, yearGroup: s.yearGroup,
+          parentName: s.parentName, parentEmail: s.parentEmail, parentPhone: s.parentPhone,
+          subCategory: s.subCategory, subject: s.subject, supportProfile: s.supportProfile,
+          startDate: s.startDate, endDate: s.endDate,
+          weeks: studentWeeks(s), hoursPerWeek: Number(s.hoursPerWeek) || 0,
+          addonIds: (s.addonIds || []).filter((id) => id && id !== "none"),
+          sendNeeds: s.sendNeeds || [], brief: s.brief || "", ehcpFileName: s.ehcpFileName || "",
+          availFlexible: s.availFlexible !== false, availDays: s.availDays || [],
+          availFrom: s.availFrom || "", availTo: s.availTo || "", availNote: s.availNote || "",
+        }));
+      }
+      function __groupsPayload() {
+        return state.groups.map((g) => {
+          const rows = groupScheduleRows(g);
+          const weeklyHours = rows.reduce((sum, r) => sum + (Number(r.hours) || 0), 0);
+          return {
+            id: g.id, groupName: g.groupName, subject: g.subject,
+            currentGrade: g.currentGrade, expectedGrade: g.expectedGrade,
+            startDate: g.startDate, endDate: g.endDate,
+            weeks: dateWeeks(g.startDate, g.endDate), weeklyHours,
+            schedule: rows.map((r) => ({ day: r.day, start: r.start, end: r.end, customTiming: !!r.customTiming, hours: Number(r.hours) || 0 })),
+            hasCustomTiming: groupHasCustomTiming(g),
+            selectedStudentIds: g.selectedStudentIds || [],
+            addonIds: (g.addonIds || []).filter((id) => id && id !== "none"),
+          };
+        });
+      }
+      async function doSubmit() {
+        const btn = document.getElementById("nextBtn");
+        const grp = isGroupProduct();
+        const payload = {
+          productId: state.product,
+          paymentPath: state.paymentMethod === "stripe" ? "pay_stripe" : "po_invoice",
+          billingNotes: (document.getElementById("billingNotes") || {}).value || "",
+          students: grp ? [] : __studentsPayload(),
+          groups: grp ? __groupsPayload() : [],
+        };
+        const prev = btn.textContent;
+        btn.disabled = true; btn.textContent = "Submitting…";
+        try {
+          const res = await api.submitEnrolment(payload);
+          state.requestId = res.requestId;
+          state.serverQuote = res.quote || null;
+          if (payload.paymentPath === "pay_stripe" && res.clientSecret && !isMock()) {
+            const paid = await runStripePayment(res.clientSecret, res.quote);
+            if (!paid) { btn.disabled = false; btn.textContent = prev; return; }   // cancelled
+          }
+          showSubmitted(res);
+        } catch (e) {
+          console.error("[enrolment] submit failed:", e);
+          alert("Submit failed: " + ((e && e.message) || e));
+        } finally {
+          btn.disabled = false; btn.textContent = prev;
+        }
+      }
+      function showSubmitted(res) {
+        state.step = 5;
+        renderStep();
+        const ref = document.querySelector('[data-step="5"] .reference');
+        if (ref && res && res.requestId) ref.textContent = res.requestId;
+      }
+      async function runStripePayment(clientSecret, quote) {
+        const total = quote ? quote.totalIncVAT : null;
+        const ov = document.createElement("div");
+        ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(20,16,40,.5);display:flex;align-items:center;justify-content:center;padding:20px";
+        ov.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:24px;font-family:inherit"><h3 style="margin:0 0 4px">Pay by card</h3><p style="margin:0 0 14px;color:#666">Amount inc. VAT: <strong>£' + (total != null ? Number(total).toFixed(2) : "—") + '</strong></p><div id="stripe-payment-element"></div><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px"><button class="btn ghost" id="stripeCancel" type="button">Cancel</button><button class="btn primary" id="stripePay" type="button">Pay now</button></div><p id="stripeErr" style="color:#c0392b;font-size:13px;margin-top:8px"></p></div>';
+        document.body.appendChild(ov);
+        let stripe, elements;
+        try { ({ stripe, elements } = await initStripeElements(clientSecret)); }
+        catch (e) { ov.querySelector("#stripeErr").textContent = e.message; }
+        return new Promise((resolve) => {
+          ov.querySelector("#stripeCancel").onclick = () => { ov.remove(); resolve(false); };
+          ov.querySelector("#stripePay").onclick = async () => {
+            const pay = ov.querySelector("#stripePay"); pay.disabled = true; pay.textContent = "Processing…";
+            try {
+              const result = await confirmPayment(stripe, elements);
+              if (result && result.error) { ov.querySelector("#stripeErr").textContent = result.error.message || "Payment failed"; pay.disabled = false; pay.textContent = "Pay now"; return; }
+              ov.remove(); resolve(true);
+            } catch (e) { ov.querySelector("#stripeErr").textContent = (e && e.message) || "Payment error"; pay.disabled = false; pay.textContent = "Pay now"; }
+          };
+        });
+      }
+
+      bootData();
     </script>
   </body>
 </html>
