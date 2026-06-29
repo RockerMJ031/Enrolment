@@ -43,6 +43,18 @@
       if (MOCK) {
         this._member = { name: 'Mock Commissioner', organisationName: 'Mock Academy Trust' };
         this._memberResolve(this._member);
+      } else {
+        // Self-diagnostic: if the Velo wrapper never sends the 'member' attribute,
+        // say WHY in plain terms instead of hanging on "Loading…".
+        var self = this;
+        setTimeout(function () {
+          if (!self._member) {
+            self._setStatus(
+              "No 'member' attribute received from Wix after 4s. Most likely the site " +
+              "was NOT re-published after the wrapper merge (old wrapper still live), " +
+              "or the element ID isn't #customElement1.", true);
+          }
+        }, 4000);
       }
       this._boot();
     }
@@ -89,7 +101,11 @@
     _boot() {
       var self = this;
       this._memberReady
-        .then(function () { self._setWelcome(); return self._call('api:listProducts'); })
+        .then(function () {
+          self._setWelcome();
+          self._setStatus('Member received — loading products from backend…');
+          return self._call('api:listProducts');
+        })
         .then(function (products) { self._renderProducts(products || []); })
         .catch(function (e) { self._setStatus('Boot failed: ' + (e && e.message), true); });
     }
