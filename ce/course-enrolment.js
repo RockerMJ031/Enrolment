@@ -69,6 +69,7 @@
         var p = this._pending.get(msg.id);
         if (p) {
           this._pending.delete(msg.id);
+          if (p.timer) clearTimeout(p.timer);
           msg.error ? p.reject(new Error(msg.error)) : p.resolve(msg.payload);
         }
       }
@@ -82,11 +83,28 @@
       return new Promise(function (resolve, reject) {
         var id = (crypto.randomUUID && crypto.randomUUID()) ||
           ('req-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10));
-        self._pending.set(id, { resolve: resolve, reject: reject });
-        self.dispatchEvent(new CustomEvent('apiCall', { detail: { type: type, id: id, payload: payload } }));
-        setTimeout(function () {
-          if (self._pending.has(id)) { self._pending.delete(id); reject(new Error(type + ' timed out after 30s')); }
-        }, 30000);
+        var rec = { resolve: resolve, reject: reject, timer: null };
+        self._pending.set(id, rec);
+        // Retry: the Velo 'apiCall' listener may attach AFTER the first dispatch (worker
+        // boundary / wrapper sets 'member' before registering .on). Re-fire every 2s until
+        // a reply arrives or we give up — covers that race without a Velo republish.
+        var attempts = 0, MAX = 6;
+        function fire() {
+          if (!self._pending.has(id)) return;            // already replied
+          attempts++;
+          // bubbles+composed: reach the Velo listener even if attached above / across a wrapper
+          self.dispatchEvent(new CustomEvent('apiCall', {
+            detail: { type: type, id: id, payload: payload },
+            bubbles: true, composed: true,
+          }));
+          rec.timer = setTimeout(attempts < MAX ? fire : function () {
+            if (self._pending.has(id)) {
+              self._pending.delete(id);
+              reject(new Error(type + ': no reply after ' + MAX + ' tries — Velo apiCall listener not reached'));
+            }
+          }, 2000);
+        }
+        fire();
       });
     }
 
