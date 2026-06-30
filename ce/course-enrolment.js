@@ -36,10 +36,15 @@
       this._member = null;
       var self = this;
       this._memberReady = new Promise(function (resolve) { self._memberResolve = resolve; });
+      this._shellReady = false;   // attributeChangedCallback can fire BEFORE connectedCallback
+      this._productsRaw = null;   // stash products that arrive before the shell exists
     }
 
     connectedCallback() {
       this._renderShell();
+      this._shellReady = true;
+      // Apply any 'products' that arrived before the shell existed (Wix sets attrs pre-upgrade).
+      if (this._productsRaw != null) this._applyProducts(this._productsRaw);
       if (MOCK) {
         this._member = { name: 'Mock Commissioner', organisationName: 'Mock Academy Trust' };
         this._memberResolve(this._member);
@@ -64,11 +69,10 @@
       if (name === 'member') {
         try { this._member = JSON.parse(newV); this._memberResolve(this._member); } catch (e) { /* ignore */ }
       } else if (name === 'products') {
-        // PUSH-ONLY: Velo pushes the catalog here (no CE->Velo event; this site's CE has no .on()).
-        var data;
-        try { data = JSON.parse(newV); } catch (e) { this._setStatus('Bad products payload', true); return; }
-        if (data && data.error) { this._setStatus('Products load failed: ' + data.error, true); return; }
-        this._renderProducts(Array.isArray(data) ? data : []);
+        // PUSH-ONLY: Velo pushes the catalog via setAttribute (this site's CE has no .on()).
+        // This can fire BEFORE connectedCallback renders the shell -> stash, apply once ready.
+        this._productsRaw = newV;
+        if (this._shellReady) this._applyProducts(newV);
       } else if (name === 'api-reply') {
         var msg;
         try { msg = JSON.parse(newV); } catch (e) { return; }
@@ -185,8 +189,16 @@
       if (el) { el.textContent = t; el.classList.toggle('err', !!err); }
     }
 
+    _applyProducts(raw) {
+      var data;
+      try { data = JSON.parse(raw); } catch (e) { this._setStatus('Bad products payload', true); return; }
+      if (data && data.error) { this._setStatus('Products load failed: ' + data.error, true); return; }
+      this._renderProducts(Array.isArray(data) ? data : []);
+    }
+
     _renderProducts(products) {
       var grid = this.querySelector('[data-ce="grid"]');
+      if (!grid) return;   // shell not rendered yet — connectedCallback will re-apply via _productsRaw
       if (!products.length) { this._setStatus('No products returned from backend.', true); return; }
       this._setStatus('Loaded ' + products.length + ' products from the backend bridge.');
       grid.innerHTML = products.map(function (p) {
