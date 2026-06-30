@@ -1,18 +1,15 @@
-// course-enrolment — THIN light-DOM Custom Element (first-cut migration probe).
+// course-enrolment — light-DOM Custom Element (FULL-BRIDGE probe).
 //
-// Purpose: prove on the REAL Wix page that
-//   (a) a light-DOM custom element registers + renders inside the Course Enrolment page,
-//   (b) the bidirectional bridge works — CE -> Velo via CustomEvent, Velo -> CE via setAttribute,
-//       reaching the real backend (listProducts) + member identity,
-//   (c) the Wix page auto-grows when the element's content height changes (the "grow" button).
+// Read path (proven): Velo pushes a 'bootstrap' bundle via setAttribute; CE renders it.
+// Write path (verifying): CE dispatches CustomEvent('rpcCall', {detail:{type,id,payload}}),
+//   Velo replies via setAttribute('rpc-reply', {id, payload|error}). A "Test write (ping)"
+//   button exercises this round-trip with no backend side effect.
 //
-// Deliberately self-contained (NO es-module imports) so Wix can load it from a single
-// source URL with no module-loader assumptions. The full 3400-line wizard port comes AFTER
-// this thin cut verifies the mechanics on the live site.
+// This site's CE: setAttribute works, getAttribute is MISSING, .on has been flaky (guarded
+// on the Velo side). attributeChangedCallback can fire BEFORE connectedCallback, so attrs
+// that arrive pre-render are stashed and applied once the shell exists.
 //
-// Mode: ?mock in the URL -> offline mock (standalone test harness). Otherwise -> live bridge.
-// NOTE: we must NOT use `window.parent === window` for mock detection here — a light-DOM CE
-// runs in the top window, so that check is always true. Mock is gated on ?mock only.
+// ?mock in the URL => offline standalone mode.
 
 (function () {
   'use strict';
@@ -28,7 +25,7 @@
   }
 
   class CourseEnrolment extends HTMLElement {
-    static get observedAttributes() { return ['member', 'products', 'api-reply']; }
+    static get observedAttributes() { return ['member', 'bootstrap', 'products', 'rpc-reply']; }
 
     constructor() {
       super();
@@ -36,28 +33,27 @@
       this._member = null;
       var self = this;
       this._memberReady = new Promise(function (resolve) { self._memberResolve = resolve; });
-      this._shellReady = false;   // attributeChangedCallback can fire BEFORE connectedCallback
-      this._productsRaw = null;   // stash products that arrive before the shell exists
+      this._shellReady = false;
+      this._bootstrapRaw = null;   // stash attrs that arrive before the shell is rendered
+      this._productsRaw = null;
+      this._addonsByProduct = {};  // kept for the full wizard port
+      this._stripeKey = '';
     }
 
     connectedCallback() {
       this._renderShell();
       this._shellReady = true;
-      // Apply any 'products' that arrived before the shell existed (Wix sets attrs pre-upgrade).
-      if (this._productsRaw != null) this._applyProducts(this._productsRaw);
+      if (this._bootstrapRaw != null) this._applyBootstrap(this._bootstrapRaw);
+      else if (this._productsRaw != null) this._applyProducts(this._productsRaw);
       if (MOCK) {
         this._member = { name: 'Mock Commissioner', organisationName: 'Mock Academy Trust' };
         this._memberResolve(this._member);
       } else {
-        // Self-diagnostic: if the Velo wrapper never sends the 'member' attribute,
-        // say WHY in plain terms instead of hanging on "Loading…".
         var self = this;
         setTimeout(function () {
           if (!self._member) {
-            self._setStatus(
-              "No 'member' attribute received from Wix after 4s. Most likely the site " +
-              "was NOT re-published after the wrapper merge (old wrapper still live), " +
-              "or the element ID isn't #customElement1.", true);
+            self._setStatus("No 'member' attribute from Wix after 4s — site not re-published, " +
+              "or element ID isn't #customElement1.", true);
           }
         }, 4000);
       }
@@ -68,12 +64,13 @@
       if (newV == null || newV === oldV) return;
       if (name === 'member') {
         try { this._member = JSON.parse(newV); this._memberResolve(this._member); } catch (e) { /* ignore */ }
+      } else if (name === 'bootstrap') {
+        this._bootstrapRaw = newV;
+        if (this._shellReady) this._applyBootstrap(newV);
       } else if (name === 'products') {
-        // PUSH-ONLY: Velo pushes the catalog via setAttribute (this site's CE has no .on()).
-        // This can fire BEFORE connectedCallback renders the shell -> stash, apply once ready.
         this._productsRaw = newV;
         if (this._shellReady) this._applyProducts(newV);
-      } else if (name === 'api-reply') {
+      } else if (name === 'rpc-reply') {
         var msg;
         try { msg = JSON.parse(newV); } catch (e) { return; }
         var p = this._pending.get(msg.id);
@@ -85,8 +82,8 @@
       }
     }
 
-    // ---- bridge: CE -> Velo (CustomEvent 'apiCall'), Velo -> CE (attribute 'api-reply') ----
-    _call(type, payload) {
+    // ---- WRITE bridge: CE -> Velo CustomEvent('rpcCall'); reply via setAttribute('rpc-reply') ----
+    _rpc(type, payload) {
       payload = payload || {};
       if (MOCK) return this._mockCall(type, payload);
       var self = this;
@@ -95,22 +92,18 @@
           ('req-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10));
         var rec = { resolve: resolve, reject: reject, timer: null };
         self._pending.set(id, rec);
-        // Retry: the Velo 'apiCall' listener may attach AFTER the first dispatch (worker
-        // boundary / wrapper sets 'member' before registering .on). Re-fire every 2s until
-        // a reply arrives or we give up — covers that race without a Velo republish.
         var attempts = 0, MAX = 6;
         function fire() {
-          if (!self._pending.has(id)) return;            // already replied
+          if (!self._pending.has(id)) return;
           attempts++;
-          // bubbles+composed: reach the Velo listener even if attached above / across a wrapper
-          self.dispatchEvent(new CustomEvent('apiCall', {
+          self.dispatchEvent(new CustomEvent('rpcCall', {
             detail: { type: type, id: id, payload: payload },
             bubbles: true, composed: true,
           }));
           rec.timer = setTimeout(attempts < MAX ? fire : function () {
             if (self._pending.has(id)) {
               self._pending.delete(id);
-              reject(new Error(type + ': no reply after ' + MAX + ' tries — Velo apiCall listener not reached'));
+              reject(new Error(type + ': no reply after ' + MAX + ' tries (CE->Velo write channel down)'));
             }
           }, 2000);
         }
@@ -121,7 +114,7 @@
     _mockCall(type, payload) {
       return new Promise(function (r) { setTimeout(r, 150); }).then(function () {
         if (type === 'api:listProducts') return fetch('../mock/products.json').then(function (r) { return r.json(); });
-        if (type === 'api:getMemberContext') return null;
+        if (type === 'ping') return { ok: true, echo: payload || null, from: 'mock' };
         throw new Error('mock: unknown type ' + type);
       });
     }
@@ -131,19 +124,17 @@
       this._memberReady.then(function () {
         self._setWelcome();
         if (MOCK) {
-          // standalone: no Velo to push products -> fetch the mock catalog directly
           self._setStatus('Member received — loading mock products…');
           self._mockCall('api:listProducts')
             .then(function (products) { self._renderProducts(products || []); })
             .catch(function (e) { self._setStatus('Mock load failed: ' + (e && e.message), true); });
         } else {
-          // live: Velo pushes the 'products' attribute -> handled in attributeChangedCallback
-          self._setStatus('Member received — waiting for products from Wix…');
+          self._setStatus('Member received — waiting for bootstrap from Wix…');
         }
       });
     }
 
-    // ---- rendering (light DOM; styles scoped by the `course-enrolment` tag prefix) ----
+    // ---- rendering (light DOM; styles scoped by the tag prefix) ----
     _renderShell() {
       this.innerHTML =
         '<style>' +
@@ -159,18 +150,26 @@
         'course-enrolment .ce-card h3{margin:0 0 6px;font-size:16px}' +
         'course-enrolment .ce-card .price{color:#4b2fae;font-weight:700}' +
         'course-enrolment .ce-card .desc{color:#6b6480;font-size:13px;margin-top:6px}' +
-        'course-enrolment .ce-btn{margin-top:18px;border:1px solid #4b2fae;background:#4b2fae;color:#fff;border-radius:8px;padding:9px 14px;font-size:14px;cursor:pointer}' +
+        'course-enrolment .ce-btn{margin-top:14px;margin-right:8px;border:1px solid #4b2fae;background:#4b2fae;color:#fff;border-radius:8px;padding:9px 14px;font-size:14px;cursor:pointer}' +
+        'course-enrolment .ce-btn.alt{background:#fff;color:#4b2fae}' +
+        'course-enrolment .ce-rpcout{margin-top:10px;font-size:13px;font-family:ui-monospace,Menlo,monospace;white-space:pre-wrap}' +
+        'course-enrolment .ce-rpcout.ok{color:#1a7f37}course-enrolment .ce-rpcout.err{color:#b00020}' +
         '</style>' +
         '<div class="ce-root">' +
         '<div class="ce-h">Course enrolment</div>' +
         '<div class="ce-sub" data-ce="welcome"></div>' +
         '<div class="ce-status" data-ce="status">Loading…</div>' +
         '<div class="ce-grid" data-ce="grid"></div>' +
+        '<div>' +
         '<button class="ce-btn" data-ce="grow" type="button">Add a tall block (auto-height test)</button>' +
+        '<button class="ce-btn alt" data-ce="rpc" type="button">Test write (ping)</button>' +
+        '</div>' +
+        '<div class="ce-rpcout" data-ce="rpcout"></div>' +
         '<div data-ce="tall"></div>' +
         '</div>';
       var self = this;
       this.querySelector('[data-ce="grow"]').addEventListener('click', function () { self._grow(); });
+      this.querySelector('[data-ce="rpc"]').addEventListener('click', function () { self._testWrite(); });
     }
 
     _setWelcome() {
@@ -189,6 +188,15 @@
       if (el) { el.textContent = t; el.classList.toggle('err', !!err); }
     }
 
+    _applyBootstrap(raw) {
+      var b;
+      try { b = JSON.parse(raw); } catch (e) { this._setStatus('Bad bootstrap payload', true); return; }
+      if (b && b.error) { this._setStatus('Bootstrap failed: ' + b.error, true); return; }
+      this._addonsByProduct = (b && b.addonsByProduct) || {};
+      this._stripeKey = (b && b.stripeKey) || '';
+      this._renderProducts((b && b.products) || []);
+    }
+
     _applyProducts(raw) {
       var data;
       try { data = JSON.parse(raw); } catch (e) { this._setStatus('Bad products payload', true); return; }
@@ -198,9 +206,13 @@
 
     _renderProducts(products) {
       var grid = this.querySelector('[data-ce="grid"]');
-      if (!grid) return;   // shell not rendered yet — connectedCallback will re-apply via _productsRaw
-      if (!products.length) { this._setStatus('No products returned from backend.', true); return; }
-      this._setStatus('Loaded ' + products.length + ' products from the backend bridge.');
+      if (!grid) return;   // shell not ready — connectedCallback re-applies from the stash
+      if (!products.length) { this._setStatus('No products returned.', true); return; }
+      var addonCount = 0, self = this;
+      products.forEach(function (p) { addonCount += ((self._addonsByProduct[p.productId] || []).length); });
+      this._setStatus('Loaded ' + products.length + ' products' +
+        (addonCount ? ' + ' + addonCount + ' add-ons' : '') +
+        (this._stripeKey ? ' + Stripe key' : '') + ' from Wix.');
       grid.innerHTML = products.map(function (p) {
         var m = (p.configV2 && p.configV2.marketing) || {};
         var price = m.priceDisplay || (p.basePriceGbp != null ? '£' + p.basePriceGbp : '');
@@ -215,8 +227,24 @@
       var block = document.createElement('div');
       block.style.cssText = 'height:600px;border:2px dashed #b9aee6;border-radius:12px;margin-top:14px;' +
         'display:flex;align-items:center;justify-content:center;color:#6b6480;font-size:14px';
-      block.textContent = 'Tall block (+600px) — the Wix page should grow to fit, with NO inner scrollbar.';
+      block.textContent = 'Tall block (+600px) — the Wix page should grow to fit, no inner scrollbar.';
       tall.appendChild(block);
+    }
+
+    _testWrite() {
+      var out = this.querySelector('[data-ce="rpcout"]');
+      out.className = 'ce-rpcout';
+      out.textContent = 'Sending rpcCall ping → Velo…';
+      var self = this;
+      this._rpc('ping', { n: 1, hello: 'CE' })
+        .then(function (reply) {
+          out.className = 'ce-rpcout ok';
+          out.textContent = '✅ WRITE round-trip OK. Velo replied: ' + JSON.stringify(reply);
+        })
+        .catch(function (e) {
+          out.className = 'ce-rpcout err';
+          out.textContent = '❌ WRITE failed: ' + (e && e.message);
+        });
     }
   }
 
